@@ -26,17 +26,17 @@
                     <ion-icon name="grid-outline"></ion-icon>
                     <span>Todo</span>
                 </div>
-                <div class="nav-item" data-category="Desayuno">
-                    <ion-icon name="sunny-outline"></ion-icon>
-                    <span>Desayuno</span>
+                <div class="nav-item" data-category="Carnes">
+                    <ion-icon name="restaurant-outline"></ion-icon>
+                    <span>Carnes</span>
                 </div>
-                <div class="nav-item" data-category="Almuerzo">
-                    <ion-icon name="fast-food-outline"></ion-icon>
-                    <span>Almuerzo</span>
+                <div class="nav-item" data-category="Pastas">
+                    <ion-icon name="pizza-outline"></ion-icon>
+                    <span>Pastas</span>
                 </div>
-                <div class="nav-item" data-category="Cena">
-                    <ion-icon name="moon-outline"></ion-icon>
-                    <span>Cena</span>
+                <div class="nav-item" data-category="Ensaladas">
+                    <ion-icon name="leaf-outline"></ion-icon>
+                    <span>Ensaladas</span>
                 </div>
                 <div class="nav-item" data-category="Postres">
                     <ion-icon name="ice-cream-outline"></ion-icon>
@@ -46,6 +46,10 @@
             <button id="add-recipe-btn" class="btn-primary">
                 <ion-icon name="add-outline"></ion-icon>
                 <span>Nueva Receta</span>
+            </button>
+            <button id="import-json-btn" class="btn-secondary" style="margin-top: 0.75rem;">
+                <ion-icon name="code-working-outline"></ion-icon>
+                <span>Importar JSON</span>
             </button>
         </aside>
 
@@ -85,25 +89,14 @@
                         <label for="recipe-name">Nombre del Plato</label>
                         <input type="text" id="recipe-name" required placeholder="Ej: Lasagna de Berenjenas">
                     </div>
-                    <div class="input-group">
-                        <label for="recipe-category">Categoría</label>
+                    <div class="input-group full-width">
+                        <label for="recipe-category">Tipo de Comida</label>
                         <select id="recipe-category" required>
-                            <option value="Desayuno">Desayuno</option>
-                            <option value="Almuerzo">Almuerzo</option>
-                            <option value="Cena">Cena</option>
+                            <option value="Carnes">Carnes</option>
+                            <option value="Pastas">Pastas</option>
+                            <option value="Ensaladas">Ensaladas</option>
                             <option value="Postres">Postres</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="recipe-time">Tiempo Estimado</label>
-                        <input type="text" id="recipe-time" placeholder="Ej: 30 min">
-                    </div>
-                    <div class="input-group">
-                        <label for="recipe-difficulty">Dificultad</label>
-                        <select id="recipe-difficulty">
-                            <option value="Fácil">Fácil</option>
-                            <option value="Media" selected>Media</option>
-                            <option value="Alta">Alta</option>
+                            <option value="Otros">Otros</option>
                         </select>
                     </div>
                     <div class="input-group full-width">
@@ -139,6 +132,25 @@
             </div>
             <div id="recipe-details" class="details-body">
                 <!-- Details will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Importing JSON -->
+    <div id="import-modal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Importar desde JSON</h2>
+                <button type="button" class="close-modal"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Pega aquí el código JSON de tu receta para cargarla automáticamente.</p>
+                <textarea id="json-input" rows="12" style="width: 100%; font-family: monospace; font-size: 0.85rem;" placeholder='{ "title": "...", "ingredients": [...], "instructions": [...] }'></textarea>
+                <div id="import-error" style="color: var(--primary); margin-top: 0.5rem; font-size: 0.85rem; display: none;">Error: Formato JSON inválido o faltan campos obligatorios.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                <button type="button" class="btn-primary" id="process-json-btn">Procesar JSON</button>
             </div>
         </div>
     </div>

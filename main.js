@@ -16,7 +16,12 @@ const recipeModal = document.getElementById('recipe-modal');
 const viewModal = document.getElementById('view-modal');
 const recipeForm = document.getElementById('recipe-form');
 const addBtn = document.getElementById('add-recipe-btn');
+const importBtn = document.getElementById('import-json-btn');
 const closeBtns = document.querySelectorAll('.close-modal');
+const importModal = document.getElementById('import-modal');
+const processJsonBtn = document.getElementById('process-json-btn');
+const jsonInput = document.getElementById('json-input');
+const importError = document.getElementById('import-error');
 
 // --- Initialization ---
 
@@ -36,35 +41,29 @@ function loadRecipes() {
             {
                 id: Date.now() + 1,
                 name: 'Tacos Al Pastor',
-                category: 'Almuerzo',
+                category: 'Carnes',
                 video: 'https://www.youtube.com/watch?v=f-B65R8n8gU',
                 ingredients: 'Carne de cerdo, piña, tortillas, cilantro, cebolla, adobo.',
                 steps: '1. Adobar la carne.\n2. Cocinar a fuego lento.\n3. Servir en tortillas con piña.',
-                image: 'https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800',
-                time: '45 min',
-                difficulty: 'Alta'
+                image: 'https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800'
             },
             {
                 id: Date.now() + 2,
                 name: 'Pasta Carbonara Auténtica',
-                category: 'Cena',
+                category: 'Pastas',
                 video: '',
                 ingredients: 'Espaguetis, guanciale, huevos, queso pecorino, pimienta negra.',
                 steps: '1. Cocer la pasta.\n2. Saltear el guanciale.\n3. Mezclar huevos y queso.\n4. Unir todo fuera del fuego.',
-                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800',
-                time: '20 min',
-                difficulty: 'Media'
+                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800'
             },
             {
                 id: Date.now() + 3,
                 name: 'Ensalada Burrata con Pesto',
-                category: 'Almuerzo',
+                category: 'Ensaladas',
                 video: 'https://www.youtube.com/watch?v=7uunR0lEqos',
                 ingredients: 'Burrata fresca, tomates cherry, pesto genovese, rúcula, aceite de oliva.',
                 steps: '1. Lavar la rúcula y ponerla de base.\n2. Colocar la burrata en el centro.\n3. Decorar con tomates y bañar en pesto.',
-                image: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800',
-                time: '10 min',
-                difficulty: 'Fácil'
+                image: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800'
             }
         ];
         saveToLocalStorage();
@@ -108,8 +107,7 @@ function renderRecipes() {
                 </div>
                 <h3>${recipe.name}</h3>
                 <div class="recipe-meta">
-                    <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '30 min'}</span>
-                    <span><ion-icon name="restaurant-outline"></ion-icon> ${recipe.difficulty || 'Media'}</span>
+                    <span><ion-icon name="nutrition-outline"></ion-icon> ${recipe.category}</span>
                 </div>
             </div>
         `;
@@ -152,12 +150,15 @@ function setupEventListeners() {
         btn.addEventListener('click', () => {
             recipeModal.style.display = 'none';
             viewModal.style.display = 'none';
+            importModal.style.display = 'none';
+            importError.style.display = 'none';
         });
     });
 
     window.addEventListener('click', (e) => {
         if (e.target === recipeModal) recipeModal.style.display = 'none';
         if (e.target === viewModal) viewModal.style.display = 'none';
+        if (e.target === importModal) importModal.style.display = 'none';
     });
 
     // Form Submission
@@ -183,6 +184,40 @@ function setupEventListeners() {
             renderRecipes();
         }
     });
+
+    // JSON Import Event
+    importBtn.addEventListener('click', () => {
+        jsonInput.value = '';
+        importError.style.display = 'none';
+        importModal.style.display = 'block';
+    });
+
+    processJsonBtn.addEventListener('click', () => {
+        try {
+            const data = JSON.parse(jsonInput.value);
+            if (!data.title || !data.ingredients || !data.instructions) {
+                throw new Error('Faltan campos (title, ingredients o instructions)');
+            }
+
+            const newRecipe = {
+                id: Date.now(),
+                name: data.title,
+                category: data.category || 'Otros',
+                ingredients: Array.isArray(data.ingredients) ? data.ingredients.join('\n') : data.ingredients,
+                steps: Array.isArray(data.instructions) ? data.instructions.join('\n') : data.instructions,
+                video: data.video || '',
+                image: `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`
+            };
+
+            recipes.push(newRecipe);
+            saveToLocalStorage();
+            renderRecipes();
+            importModal.style.display = 'none';
+        } catch (e) {
+            importError.textContent = 'Error: ' + e.message;
+            importError.style.display = 'block';
+        }
+    });
 }
 
 function saveRecipe() {
@@ -192,12 +227,9 @@ function saveRecipe() {
     const steps = document.getElementById('recipe-steps').value;
     const video = document.getElementById('recipe-video').value;
 
-    const time = document.getElementById('recipe-time')?.value || '30 min';
-    const difficulty = document.getElementById('recipe-difficulty')?.value || 'Media';
-
     if (editingRecipeId) {
         const index = recipes.findIndex(r => r.id === editingRecipeId);
-        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video, time, difficulty };
+        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video };
     } else {
         const newRecipe = {
             id: Date.now(),
@@ -206,8 +238,6 @@ function saveRecipe() {
             ingredients,
             steps,
             video,
-            time,
-            difficulty,
             image: `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800` // Dynamic image fallback
         };
         recipes.push(newRecipe);
