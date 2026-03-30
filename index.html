@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gusto - El Recetario Definitivo</title>
+    <meta name="description" content="Guarda, busca y organiza tus recetas favoritas con Gusto. Tu cocina, tus reglas.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Ionicons for Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div id="app">
+        <aside class="sidebar">
+            <div class="logo">
+                <ion-icon name="restaurant"></ion-icon>
+                <span>Gusto</span>
+            </div>
+            <nav>
+                <div class="nav-item active" data-category="all">
+                    <ion-icon name="grid-outline"></ion-icon>
+                    <span>Todo</span>
+                </div>
+                <div class="nav-item" data-category="Desayuno">
+                    <ion-icon name="sunny-outline"></ion-icon>
+                    <span>Desayuno</span>
+                </div>
+                <div class="nav-item" data-category="Almuerzo">
+                    <ion-icon name="fast-food-outline"></ion-icon>
+                    <span>Almuerzo</span>
+                </div>
+                <div class="nav-item" data-category="Cena">
+                    <ion-icon name="moon-outline"></ion-icon>
+                    <span>Cena</span>
+                </div>
+                <div class="nav-item" data-category="Postres">
+                    <ion-icon name="ice-cream-outline"></ion-icon>
+                    <span>Postres</span>
+                </div>
+            </nav>
+            <button id="add-recipe-btn" class="btn-primary">
+                <ion-icon name="add-outline"></ion-icon>
+                <span>Nueva Receta</span>
+            </button>
+        </aside>
+
+        <main class="content">
+            <header>
+                <div class="search-container">
+                    <ion-icon name="search-outline"></ion-icon>
+                    <input type="text" id="recipe-search" placeholder="Busca ingredientes, platos...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">U</div>
+                </div>
+            </header>
+
+            <section class="recipe-grid-container">
+                <div class="header-info">
+                    <h1 id="category-title">Mis Recetas</h1>
+                    <p id="recipe-count">Tienes 0 recetas guardadas</p>
+                </div>
+                <div class="recipe-grid" id="recipe-grid">
+                    <!-- Recipes will be injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Adding/Editing Recipes -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="modal-title">Nueva Receta</h2>
+                <button type="button" class="close-modal"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+            <form id="recipe-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="recipe-name">Nombre del Plato</label>
+                        <input type="text" id="recipe-name" required placeholder="Ej: Lasagna de Berenjenas">
+                    </div>
+                    <div class="input-group">
+                        <label for="recipe-category">Categoría</label>
+                        <select id="recipe-category" required>
+                            <option value="Desayuno">Desayuno</option>
+                            <option value="Almuerzo">Almuerzo</option>
+                            <option value="Cena">Cena</option>
+                            <option value="Postres">Postres</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="recipe-time">Tiempo Estimado</label>
+                        <input type="text" id="recipe-time" placeholder="Ej: 30 min">
+                    </div>
+                    <div class="input-group">
+                        <label for="recipe-difficulty">Dificultad</label>
+                        <select id="recipe-difficulty">
+                            <option value="Fácil">Fácil</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="recipe-video">URL de Video (Youtube, opcional)</label>
+                        <input type="url" id="recipe-video" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="recipe-ingredients">Ingredientes</label>
+                        <textarea id="recipe-ingredients" rows="4" required placeholder="Una lista de ingredientes..."></textarea>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="recipe-steps">Pasos de Preparación</label>
+                        <textarea id="recipe-steps" rows="6" required placeholder="Describe el proceso detalladamente..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="save-recipe-btn">Guardar Receta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Viewing Recipe Details -->
+    <div id="view-modal" class="modal">
+        <div class="modal-content glass detail-view">
+            <div class="modal-header no-border">
+                <button type="button" class="close-modal circle"><ion-icon name="arrow-back-outline"></ion-icon></button>
+                <div class="actions">
+                    <button id="edit-current-btn" class="btn-icon"><ion-icon name="create-outline"></ion-icon></button>
+                    <button id="delete-current-btn" class="btn-icon danger"><ion-icon name="trash-outline"></ion-icon></button>
+                </div>
+            </div>
+            <div id="recipe-details" class="details-body">
+                <!-- Details will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
