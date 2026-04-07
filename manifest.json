@@ -1,0 +1,17 @@
+{
+  "name": "Gusto Recetario",
+  "short_name": "Gusto",
+  "description": "Tu recetario inteligente con planificación semanal y lista de compras.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#ff4757",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3565/3565418.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

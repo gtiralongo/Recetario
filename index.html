@@ -15,6 +15,7 @@
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <!-- Favicon -->
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -28,12 +29,16 @@
                 </div>
 
                 <nav class="top-nav">
-                    <div class="nav-item active" data-category="all">Todo</div>
-                    <div class="nav-item" data-category="Carnes">Carnes</div>
-                    <div class="nav-item" data-category="Pastas">Pastas</div>
-                    <div class="nav-item" data-category="Ensaladas">Ensaladas</div>
-                    <div class="nav-item" data-category="Postres">Postres</div>
-                    <div class="nav-item" data-category="Otros">Otros</div>
+                    <div class="nav-item active" data-view="home" data-category="all">Todo</div>
+                    <div class="nav-item" data-view="home" data-category="Carnes">Carnes</div>
+                    <div class="nav-item" data-view="home" data-category="Pastas">Pastas</div>
+                    <div class="nav-item" data-view="home" data-category="Ensaladas">Ensaladas</div>
+                    <div class="nav-item" data-view="home" data-category="Postres">Postres</div>
+                    <div class="nav-item" data-view="home" data-category="Otros">Otros</div>
+                    <div class="nav-sep"></div>
+                    <div class="nav-item" data-view="favorites"><ion-icon name="star"></ion-icon></div>
+                    <div class="nav-item" data-view="planner"><ion-icon name="calendar-outline"></ion-icon></div>
+                    <div class="nav-item" data-view="shopping"><ion-icon name="cart-outline"></ion-icon></div>
                 </nav>
 
                 <div class="header-actions">
@@ -59,6 +64,28 @@
         </header>
 
         <main class="content">
+            <!-- Weekly Planner View -->
+            <section id="planner-view" class="view-section" style="display: none;">
+                <div class="header-info">
+                    <h1>Planificador Semanal</h1>
+                    <p>Organiza tus comidas de la semana</p>
+                </div>
+                <div class="planner-grid" id="planner-grid">
+                    <!-- Days of week will be injected here -->
+                </div>
+            </section>
+
+            <!-- Shopping List View -->
+            <section id="shopping-view" class="view-section" style="display: none;">
+                <div class="header-info">
+                    <h1>Lista de Compras</h1>
+                    <p>Ingredientes necesarios para tus recetas planeadas</p>
+                </div>
+                <div class="shopping-list-container glass" id="shopping-list-content">
+                    <!-- Shopping list items will be injected here -->
+                </div>
+            </section>
+
             <section class="random-recipes-container" id="random-recipes-container">
                 <div class="header-info">
                     <h1 id="category-title">Descubre algo nuevo</h1>
@@ -102,6 +129,18 @@
                             <option value="Ensaladas">Ensaladas</option>
                             <option value="Postres">Postres</option>
                             <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="recipe-time">Tiempo (minutos)</label>
+                        <input type="number" id="recipe-time" placeholder="Ej: 30" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="recipe-difficulty">Dificultad</label>
+                        <select id="recipe-difficulty">
+                            <option value="Fácil">Fácil</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Difícil">Difícil</option>
                         </select>
                     </div>
                     <div class="input-group full-width">
@@ -148,9 +187,19 @@
     <div id="view-modal" class="modal">
         <div class="modal-content glass detail-view">
             <div class="modal-header no-border">
-                <button type="button" class="close-modal circle"><ion-icon
-                        name="arrow-back-outline"></ion-icon></button>
+                <div class="header-left">
+                    <button type="button" class="close-modal circle"><ion-icon
+                            name="arrow-back-outline"></ion-icon></button>
+                    <button id="favorite-current-btn" class="favorite-btn-static circle">
+                        <ion-icon name="star-outline"></ion-icon>
+                    </button>
+                </div>
                 <div class="actions">
+                    <button id="cook-mode-btn" class="btn-primary-sm">
+                        <ion-icon name="flame-outline"></ion-icon>
+                        <span>Cocinando</span>
+                    </button>
+                    <button id="share-recipe-btn" class="btn-icon"><ion-icon name="share-social-outline"></ion-icon></button>
                     <button id="edit-current-btn" class="btn-icon"><ion-icon name="create-outline"></ion-icon></button>
                     <button id="delete-current-btn" class="btn-icon danger"><ion-icon
                             name="trash-outline"></ion-icon></button>
@@ -181,6 +230,42 @@
             <div class="modal-footer">
                 <button type="button" class="btn-secondary close-modal">Cancelar</button>
                 <button type="button" class="btn-primary" id="process-json-btn">Procesar JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cooking Mode Overlay -->
+    <div id="cook-overlay" class="cook-overlay" style="display: none;">
+        <div class="cook-content glass">
+            <header class="cook-header">
+                <h1 id="cook-title">Título de la Receta</h1>
+                <button id="exit-cook-btn" class="btn-icon"><ion-icon name="close-outline"></ion-icon></button>
+            </header>
+            <div class="cook-body">
+                <div class="cook-section">
+                    <h2>Ingredientes <small>(Toca para marcar)</small></h2>
+                    <ul id="cook-ingredients-list" class="checklist"></ul>
+                </div>
+                <div class="cook-section">
+                    <h2>Preparación</h2>
+                    <div id="cook-steps-list" class="cook-steps"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Planner Selection -->
+    <div id="planner-modal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Añadir al Plan de <span id="planner-day-name">Día</span></h2>
+                <button type="button" class="close-modal"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Selecciona una de tus recetas para este día:</p>
+                <div id="planner-options" class="planner-options">
+                    <!-- Recipes will be listed here -->
+                </div>
             </div>
         </div>
     </div>

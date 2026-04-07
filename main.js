@@ -3,6 +3,7 @@ let recipes = [];
 let currentCategory = 'all';
 let currentSearch = '';
 let editingRecipeId = null;
+let currentView = 'home'; // home, favorites, planner, shopping
 
 // DOM Elements
 const recipeGrid = document.getElementById('recipe-grid');
@@ -16,6 +17,28 @@ const imageInput = document.getElementById('recipe-image');
 const imagePreview = document.getElementById('image-preview');
 const imagePlaceholder = document.getElementById('image-placeholder');
 const searchGoogleBtn = document.getElementById('search-google-btn');
+
+// Advanced Sections
+const plannerView = document.getElementById('planner-view');
+const shoppingView = document.getElementById('shopping-view');
+const recipeGridContainer = document.querySelector('.recipe-grid-container');
+const plannerGrid = document.getElementById('planner-grid');
+const shoppingContent = document.getElementById('shopping-list-content');
+
+// Planner Modal
+const plannerModal = document.getElementById('planner-modal');
+const plannerDayName = document.getElementById('planner-day-name');
+const plannerOptions = document.getElementById('planner-options');
+let activePlannerDay = '';
+
+// Cooking Mode
+const cookOverlay = document.getElementById('cook-overlay');
+const exitCookBtn = document.getElementById('exit-cook-btn');
+const cookModeBtn = document.getElementById('cook-mode-btn');
+const shareRecipeBtn = document.getElementById('share-recipe-btn');
+const deleteCurrentBtn = document.getElementById('delete-current-btn');
+const editCurrentBtn = document.getElementById('edit-current-btn');
+const favoriteCurrentBtn = document.getElementById('favorite-current-btn');
 
 // Modals
 const recipeModal = document.getElementById('recipe-modal');
@@ -31,10 +54,12 @@ const importError = document.getElementById('import-error');
 
 // --- Initialization ---
 
+let plannerData = JSON.parse(localStorage.getItem('gusto_planner')) || {};
+
 function init() {
     loadRecipes();
     setupEventListeners();
-    renderRecipes();
+    switchView('home');
     renderRandomRecipes();
 }
 
@@ -52,7 +77,10 @@ function loadRecipes() {
                 video: 'https://www.youtube.com/watch?v=f-B65R8n8gU',
                 ingredients: 'Carne de cerdo, piña, tortillas, cilantro, cebolla, adobo.',
                 steps: '1. Adobar la carne.\n2. Cocinar a fuego lento.\n3. Servir en tortillas con piña.',
-                image: 'https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800'
+                image: 'https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800',
+                time: 45,
+                difficulty: 'Media',
+                isFavorite: true
             },
             {
                 id: Date.now() + 2,
@@ -61,7 +89,10 @@ function loadRecipes() {
                 video: '',
                 ingredients: 'Espaguetis, guanciale, huevos, queso pecorino, pimienta negra.',
                 steps: '1. Cocer la pasta.\n2. Saltear el guanciale.\n3. Mezclar huevos y queso.\n4. Unir todo fuera del fuego.',
-                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800'
+                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800',
+                time: 20,
+                difficulty: 'Fácil',
+                isFavorite: false
             },
             {
                 id: Date.now() + 3,
@@ -70,7 +101,10 @@ function loadRecipes() {
                 video: 'https://www.youtube.com/watch?v=7uunR0lEqos',
                 ingredients: 'Burrata fresca, tomates cherry, pesto genovese, rúcula, aceite de oliva.',
                 steps: '1. Lavar la rúcula y ponerla de base.\n2. Colocar la burrata en el centro.\n3. Decorar con tomates y bañar en pesto.',
-                image: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800'
+                image: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800',
+                time: 15,
+                difficulty: 'Fácil',
+                isFavorite: false
             }
         ];
         saveToLocalStorage();
@@ -88,11 +122,12 @@ function renderRecipes() {
         const matchesCategory = currentCategory === 'all' || r.category === currentCategory;
         const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
                              r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const matchesView = currentView === 'home' || (currentView === 'favorites' && r.isFavorite);
+        return matchesCategory && matchesSearch && matchesView;
     });
 
-    // Hide random recipes if searching or filtering by category
-    if (currentSearch || currentCategory !== 'all') {
+    // Hide random recipes if searching, filtering by category, or not in home view
+    if (currentSearch || currentCategory !== 'all' || currentView !== 'home') {
         randomContainer.style.display = 'none';
     } else {
         randomContainer.style.display = 'block';
@@ -115,6 +150,9 @@ function renderRecipes() {
         card.className = 'recipe-card';
         card.innerHTML = `
             <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" class="recipe-img" alt="${recipe.name}">
+            <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${recipe.id})">
+                <ion-icon name="${recipe.isFavorite ? 'star' : 'star-outline'}"></ion-icon>
+            </button>
             ${recipe.video ? '<div class="video-badge"><ion-icon name="play"></ion-icon></div>' : ''}
             <div class="recipe-info">
                 <div class="recipe-tags">
@@ -122,7 +160,8 @@ function renderRecipes() {
                 </div>
                 <h3>${recipe.name}</h3>
                 <div class="recipe-meta">
-                    <span><ion-icon name="nutrition-outline"></ion-icon> ${recipe.category}</span>
+                    <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '--'} min</span>
+                    <span><ion-icon name="bar-chart-outline"></ion-icon> ${recipe.difficulty || 'Media'}</span>
                 </div>
             </div>
         `;
@@ -174,10 +213,33 @@ function setupEventListeners() {
         item.addEventListener('click', () => {
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            currentCategory = item.dataset.category;
-            categoryTitle.textContent = item.textContent === 'Todo' ? 'Mis Recetas' : item.textContent;
-            renderRecipes();
+            
+            if (item.dataset.view) {
+                switchView(item.dataset.view);
+            }
+            
+            if (item.dataset.category) {
+                currentCategory = item.dataset.category;
+                categoryTitle.textContent = item.textContent === 'Todo' ? 'Mis Recetas' : item.textContent;
+                renderRecipes();
+            }
         });
+    });
+
+    // Cooking Mode & Share
+    cookModeBtn.addEventListener('click', () => {
+        const r = recipes.find(rec => rec.id === editingRecipeId);
+        if (r) openCookMode(r);
+    });
+
+    shareRecipeBtn.addEventListener('click', () => {
+        const r = recipes.find(rec => rec.id === editingRecipeId);
+        if (r) shareRecipe(r);
+    });
+
+    exitCookBtn.addEventListener('click', () => {
+        cookOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
     });
 
     // Modals
@@ -284,10 +346,12 @@ function saveRecipe() {
     const steps = document.getElementById('recipe-steps').value;
     const video = document.getElementById('recipe-video').value;
     const image = document.getElementById('recipe-image').value || `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`;
+    const time = parseInt(document.getElementById('recipe-time').value) || 30;
+    const difficulty = document.getElementById('recipe-difficulty').value;
 
     if (editingRecipeId) {
         const index = recipes.findIndex(r => r.id === editingRecipeId);
-        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video, image };
+        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video, image, time, difficulty };
     } else {
         const newRecipe = {
             id: Date.now(),
@@ -296,7 +360,10 @@ function saveRecipe() {
             ingredients,
             steps,
             video,
-            image
+            image,
+            time,
+            difficulty,
+            isFavorite: false
         };
         recipes.push(newRecipe);
     }
@@ -314,6 +381,9 @@ function openEditModal(recipe) {
     document.getElementById('recipe-steps').value = recipe.steps;
     document.getElementById('recipe-video').value = recipe.video;
     document.getElementById('recipe-image').value = recipe.image || '';
+    document.getElementById('recipe-time').value = recipe.time || '';
+    document.getElementById('recipe-difficulty').value = recipe.difficulty || 'Media';
+    
     updateImagePreview(recipe.image || '');
     document.getElementById('modal-title').textContent = 'Editar Receta';
     recipeModal.style.display = 'block';
@@ -361,7 +431,193 @@ function viewRecipe(id) {
         ` : ''}
     `;
 
+    // Update Favorite Button in Modal
+    const favIcon = favoriteCurrentBtn.querySelector('ion-icon');
+    if (recipe.isFavorite) {
+        favoriteCurrentBtn.classList.add('active');
+        favIcon.setAttribute('name', 'star');
+    } else {
+        favoriteCurrentBtn.classList.remove('active');
+        favIcon.setAttribute('name', 'star-outline');
+    }
+
+    favoriteCurrentBtn.onclick = () => {
+        toggleFavorite(recipe.id);
+        // Refresh local UI
+        const updated = recipes.find(r => r.id === recipe.id);
+        if (updated.isFavorite) {
+            favoriteCurrentBtn.classList.add('active');
+            favIcon.setAttribute('name', 'star');
+        } else {
+            favoriteCurrentBtn.classList.remove('active');
+            favIcon.setAttribute('name', 'star-outline');
+        }
+    };
+
     viewModal.style.display = 'block';
+}
+
+function toggleFavorite(id) {
+    const index = recipes.findIndex(r => r.id === id);
+    if (index !== -1) {
+        recipes[index].isFavorite = !recipes[index].isFavorite;
+        saveToLocalStorage();
+        renderRecipes();
+        if (currentView === 'home' && currentCategory === 'all' && !currentSearch) {
+            renderRandomRecipes();
+        }
+    }
+}
+
+// --- Views & Features ---
+
+function switchView(view) {
+    currentView = view;
+    
+    // Hide all
+    plannerView.style.display = 'none';
+    shoppingView.style.display = 'none';
+    recipeGridContainer.style.display = 'none';
+    randomContainer.style.display = 'none';
+
+    if (view === 'home' || view === 'favorites') {
+        recipeGridContainer.style.display = 'block';
+        renderRecipes();
+    } else if (view === 'planner') {
+        plannerView.style.display = 'block';
+        renderWeeklyPlanner();
+    } else if (view === 'shopping') {
+        shoppingView.style.display = 'block';
+        renderShoppingList();
+    }
+}
+
+function renderWeeklyPlanner() {
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    plannerGrid.innerHTML = '';
+
+    days.forEach(day => {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'planner-day';
+        
+        const plannedRecipes = (plannerData[day] || []).map(id => {
+            const r = recipes.find(rec => rec.id === id);
+            return r ? `<div class="planner-recipe">
+                <span>${r.name}</span>
+                <button class="btn-icon circle-sm danger" onclick="removeFromPlanner('${day}', ${id})"><ion-icon name="close-outline"></ion-icon></button>
+            </div>` : '';
+        }).join('');
+
+        dayDiv.innerHTML = `
+            <h3>${day}</h3>
+            ${plannedRecipes}
+            <div class="planner-slot" onclick="openPlannerSelector('${day}')">
+                <ion-icon name="add-outline"></ion-icon>
+                <span>Añadir receta</span>
+            </div>
+        `;
+        plannerGrid.appendChild(dayDiv);
+    });
+}
+
+function openPlannerSelector(day) {
+    activePlannerDay = day;
+    plannerDayName.textContent = day;
+    
+    plannerOptions.innerHTML = '';
+    
+    if (recipes.length === 0) {
+        plannerOptions.innerHTML = '<p class="no-recipes small">No tienes recetas guardadas aún.</p>';
+    } else {
+        recipes.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'planner-option-item';
+            div.innerHTML = `
+                <img src="${r.image}" alt="${r.name}">
+                <span>${r.name}</span>
+            `;
+            div.onclick = () => {
+                if (!plannerData[day]) plannerData[day] = [];
+                plannerData[day].push(r.id);
+                savePlannerData();
+                renderWeeklyPlanner();
+                plannerModal.style.display = 'none';
+            };
+            plannerOptions.appendChild(div);
+        });
+    }
+
+    plannerModal.style.display = 'block';
+}
+
+function removeFromPlanner(day, id) {
+    plannerData[day] = (plannerData[day] || []).filter(rid => rid !== id);
+    savePlannerData();
+    renderWeeklyPlanner();
+}
+
+function savePlannerData() {
+    localStorage.setItem('gusto_planner', JSON.stringify(plannerData));
+}
+
+function renderShoppingList() {
+    shoppingContent.innerHTML = '';
+    const allIngredients = [];
+    
+    Object.values(plannerData).flat().forEach(id => {
+        const r = recipes.find(rec => rec.id === id);
+        if (r && r.ingredients) {
+            r.ingredients.split('\n').forEach(i => {
+                if (i.trim()) allIngredients.push(i.trim());
+            });
+        }
+    });
+
+    if (allIngredients.length === 0) {
+        shoppingContent.innerHTML = '<p class="no-recipes">Añade recetas al planificador para ver tu lista de compras.</p>';
+        return;
+    }
+
+    // De-duplicate (simple)
+    const unique = [...new Set(allIngredients)];
+
+    unique.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'shopping-item';
+        div.innerHTML = `<span>${item}</span><ion-icon name="checkmark-circle-outline" color="primary"></ion-icon>`;
+        shoppingContent.appendChild(div);
+    });
+}
+
+function openCookMode(recipe) {
+    document.getElementById('cook-title').textContent = recipe.name;
+    const ingredientsList = document.getElementById('cook-ingredients-list');
+    const stepsDiv = document.getElementById('cook-steps-list');
+
+    // Split by newlines, commas or semicolons to separate ingredients correctly
+    ingredientsList.innerHTML = recipe.ingredients.split(/[\n,;]+/).filter(i => i.trim()).map(i => `
+        <li onclick="this.classList.toggle('checked')">${i.trim()}</li>
+    `).join('');
+
+    stepsDiv.innerHTML = recipe.steps.split('\n').filter(s => s.trim()).map(s => `
+        <p>${s}</p>
+    `).join('');
+
+    cookOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function shareRecipe(recipe) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Gusto: ' + recipe.name,
+            text: `Mira esta receta: ${recipe.name}\n\nIngredientes:\n${recipe.ingredients}`,
+            url: window.location.href
+        }).then(() => console.log('Compartido con éxito'))
+          .catch((error) => console.log('Error compartiendo', error));
+    } else {
+        alert('La función de compartir no está disponible en este navegador.');
+    }
 }
 
 function getYoutubeEmbedUrl(url) {
