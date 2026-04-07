@@ -823,61 +823,80 @@ input:focus, textarea:focus {
 
 @media (max-width: 480px) {
     .header-content {
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+    }
+    
+    .logo-container {
+        grid-column: 1;
+        grid-row: 1;
     }
     
     .header-actions {
-        flex-wrap: nowrap;
+        display: contents;
+    }
+    
+    .header-btn-group {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex !important;
         gap: 0.5rem;
+        align-items: center;
     }
     
-    .search-container {
-        flex: 1;
-        min-width: 120px;
-        padding: 0 0.75rem;
-    }
-    
-    #add-recipe-btn, .import-json-btn, .close-modal.circle, .favorite-btn-static.circle, .btn-icon {
+    #add-recipe-btn, #import-json-btn, .btn-icon-alt {
         width: 44px !important;
         height: 44px !important;
         min-width: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0 !important;
+    }
+    
+    #add-recipe-btn {
+        background: var(--primary) !important;
+    }
+    
+    #add-recipe-btn ion-icon {
+        font-size: 1.6rem !important;
+    }
+
+    .search-container {
+        grid-column: 1 / span 2;
+        grid-row: 2;
+        width: 100% !important;
+        min-width: 100% !important;
+        margin-top: 0.25rem;
+    }
+    
+    .top-nav {
+        grid-column: 1 / span 2;
+        grid-row: 3;
+        width: 100vw;
+        margin: 0 -1.5rem;
+        padding: 0 1.5rem 0.5rem;
+    }
+    
+    .nav-sep {
+        display: none;
     }
     
     #add-recipe-btn span {
         display: none;
     }
-    
-    .logo span {
-        font-size: 1.25rem;
+
+    .random-recipes-container {
+        margin-top: 1rem;
     }
     
-    /* Fix overlapping in Modal Detail */
-    .modal-header.no-border {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1.5rem;
-    }
-    
-    .modal-header .actions {
-        width: 100%;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    
-    #cook-mode-btn {
-        flex: 1;
-        justify-content: center;
-        height: 44px;
-    }
-    
-    .detail-img {
-        height: 220px;
-    }
-    
-    .details-body {
-        padding: 0 1.25rem 2rem 1.25rem;
+    .random-card {
+        min-width: 260px;
+        height: 160px;
     }
 }
 
