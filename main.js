@@ -217,21 +217,59 @@ function setupEventListeners() {
         renderRecipes();
     });
 
-    // Filter Navigation
+    // Custom Mobile Category Dropdown
+    const dropdown = document.getElementById('category-dropdown');
+    const dropdownTrigger = dropdown?.querySelector('.dropdown-trigger');
+    const dropdownOptions = dropdown?.querySelectorAll('.dropdown-options li');
+    const currentCategoryLabel = document.getElementById('current-category-label');
+
+    if (dropdownTrigger) {
+        dropdownTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+    }
+
+    if (dropdownOptions) {
+        dropdownOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const category = option.dataset.category;
+                currentCategory = category;
+                if (currentCategoryLabel) {
+                    currentCategoryLabel.textContent = option.textContent;
+                }
+                dropdown.classList.remove('active');
+                switchView('home');
+                renderRecipes();
+            });
+        });
+    }
+
+    // Close dropdown on click outside
+    window.addEventListener('click', () => {
+        if (dropdown) dropdown.classList.remove('active');
+    });
+
+    // Filter Navigation (Icons)
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            navItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            
-            if (item.dataset.view) {
-                switchView(item.dataset.view);
+            const view = item.dataset.view;
+            const category = item.dataset.category;
+
+            if (category) {
+                currentCategory = category;
+                // Sync mobile label
+                if (currentCategoryLabel) {
+                    const matchingOption = Array.from(dropdownOptions || []).find(opt => opt.dataset.category === category);
+                    if (matchingOption) currentCategoryLabel.textContent = matchingOption.textContent;
+                }
+            }
+
+            if (view) {
+                switchView(view);
             }
             
-            if (item.dataset.category) {
-                currentCategory = item.dataset.category;
-                categoryTitle.textContent = item.textContent === 'Todo' ? 'Mis Recetas' : item.textContent;
-                renderRecipes();
-            }
+            renderRecipes();
         });
     });
 
@@ -498,6 +536,29 @@ function switchView(view) {
     } else if (view === 'shopping') {
         shoppingView.style.display = 'block';
         renderShoppingList();
+    }
+
+    // Update active state for all nav items (desktop + mobile)
+    navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-view') === view) {
+            // Only mark as active if it matches the current view
+            // Exception: home category items only if currentView is home
+            if (view === 'home') {
+                if (item.getAttribute('data-category') === currentCategory) {
+                    item.classList.add('active');
+                }
+            } else {
+                item.classList.add('active');
+            }
+        }
+    });
+
+    // Update Category label in custom mobile dropdown
+    const currentCategoryLabel = document.getElementById('current-category-label');
+    if (currentCategoryLabel && view === 'home') {
+        const option = document.querySelector(`.dropdown-options li[data-category="${currentCategory}"]`);
+        if (option) currentCategoryLabel.textContent = option.textContent;
     }
 }
 

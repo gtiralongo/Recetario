@@ -36,10 +36,33 @@
                     <div class="nav-item" data-view="home" data-category="Postres">Postres</div>
                     <div class="nav-item" data-view="home" data-category="Otros">Otros</div>
                     <div class="nav-sep"></div>
-                    <div class="nav-item" data-view="favorites"><ion-icon name="star"></ion-icon></div>
-                    <div class="nav-item" data-view="planner"><ion-icon name="calendar-outline"></ion-icon></div>
-                    <div class="nav-item" data-view="shopping"><ion-icon name="cart-outline"></ion-icon></div>
+                    <div class="nav-item" data-view="favorites" title="Favoritos"><ion-icon name="star"></ion-icon></div>
+                    <div class="nav-item" data-view="planner" title="Planificador"><ion-icon name="calendar-outline"></ion-icon></div>
+                    <div class="nav-item" data-view="shopping" title="Compras"><ion-icon name="cart-outline"></ion-icon></div>
                 </nav>
+
+                <!-- Mobile Navigation (Dropdown for categories + Icon tabs) -->
+                <div class="mobile-nav">
+                    <div class="custom-dropdown" id="category-dropdown">
+                        <div class="dropdown-trigger">
+                            <span id="current-category-label">Ver Todas</span>
+                            <ion-icon name="chevron-down-outline"></ion-icon>
+                        </div>
+                        <ul class="dropdown-options">
+                            <li data-category="all">Ver Todas</li>
+                            <li data-category="Carnes">Carnes</li>
+                            <li data-category="Pastas">Pastas</li>
+                            <li data-category="Ensaladas">Ensaladas</li>
+                            <li data-category="Postres">Postres</li>
+                            <li data-category="Otros">Otros</li>
+                        </ul>
+                    </div>
+                    <div class="mobile-icon-tabs">
+                        <div class="nav-item" data-view="favorites" title="Favoritos"><ion-icon name="star"></ion-icon></div>
+                        <div class="nav-item" data-view="planner" title="Planificador"><ion-icon name="calendar-outline"></ion-icon></div>
+                        <div class="nav-item" data-view="shopping" title="Compras"><ion-icon name="cart-outline"></ion-icon></div>
+                    </div>
+                </div>
 
                 <div class="header-actions">
                     <div class="search-container">

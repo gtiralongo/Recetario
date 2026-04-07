@@ -875,11 +875,21 @@ input:focus, textarea:focus {
     }
     
     .top-nav {
+        display: none !important;
+    }
+
+    .mobile-nav {
         grid-column: 1 / span 2;
         grid-row: 3;
-        width: 100vw;
-        margin: 0 -1.5rem;
-        padding: 0 1.5rem 0.5rem;
+        display: flex !important;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .category-dropdown-wrapper {
+        min-width: 0; /* Important for flex child with text */
     }
     
     .nav-sep {
@@ -1134,4 +1144,104 @@ input:focus, textarea:focus {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
+}
+
+/* Custom Dropdown Styling */
+.mobile-nav {
+    display: none;
+    width: 100%;
+}
+
+.custom-dropdown {
+    flex: 1;
+    position: relative;
+    user-select: none;
+}
+
+.dropdown-trigger {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    transition: var(--transition-fast);
+}
+
+.dropdown-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    list-style: none;
+    padding: 0.5rem;
+    display: none;
+    z-index: 1000;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-dropdown.active .dropdown-options {
+    display: block;
+}
+
+.custom-dropdown.active .dropdown-trigger {
+    border-color: var(--primary);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.dropdown-options li {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.dropdown-options li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+}
+
+.mobile-icon-tabs {
+    display: flex !important;
+    gap: 0.5rem;
+}
+
+.mobile-icon-tabs .nav-item {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+.mobile-icon-tabs .nav-item.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
