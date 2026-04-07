@@ -686,38 +686,101 @@ input:focus, textarea:focus {
 }
 
 
-@media (max-width: 1100px) {
+@media (max-width: 1024px) {
+    .main-header {
+        padding: 1rem 1.5rem;
+    }
+    
     .header-content {
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
     }
+    
     .top-nav {
         order: 3;
-        width: 100%;
-        justify-content: center;
+        width: 100vw;
+        margin: 0 -1.5rem;
+        padding: 0 1.5rem 0.5rem;
         overflow-x: auto;
-        padding-bottom: 0.5rem;
+        justify-content: flex-start;
+        scrollbar-width: none;
     }
+    
+    .top-nav::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .nav-item {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
     .header-actions {
         width: 100%;
-        justify-content: space-between;
+        gap: 0.75rem;
     }
+    
     .search-container {
         flex: 1;
+        width: auto !important;
+    }
+    
+    .content {
+        padding: 2.5rem 1.5rem;
     }
 }
 
-@media (max-width: 600px) {
-    .main-header {
-        padding: 1rem;
+@media (max-width: 768px) {
+    .header-info h1 {
+        font-size: 1.8rem;
     }
-    .content {
-        padding: 2rem 1.5rem;
+    
+    .random-recipes-container {
+        margin-bottom: 2.5rem;
     }
+    
+    .recipe-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 1rem auto;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        align-items: flex-start;
+    }
+    
     .header-actions {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
+    
     #add-recipe-btn span {
         display: none;
+    }
+    
+    #add-recipe-btn {
+        width: 40px;
+        padding: 0;
+    }
+    
+    .logo span {
+        font-size: 1.25rem;
+    }
+    
+    .detail-img {
+        height: 250px;
+    }
+    
+    .details-body {
+        padding: 0 1.5rem 2rem 1.5rem;
     }
 }
