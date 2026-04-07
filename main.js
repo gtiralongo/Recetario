@@ -9,7 +9,13 @@ const recipeGrid = document.getElementById('recipe-grid');
 const recipeCountText = document.getElementById('recipe-count');
 const searchInput = document.getElementById('recipe-search');
 const navItems = document.querySelectorAll('.nav-item');
-const categoryTitle = document.getElementById('category-title');
+const categoryTitle = document.getElementById('main-grid-title');
+const randomContainer = document.getElementById('random-recipes-container');
+const randomTrack = document.getElementById('random-recipes-track');
+const imageInput = document.getElementById('recipe-image');
+const imagePreview = document.getElementById('image-preview');
+const imagePlaceholder = document.getElementById('image-placeholder');
+const searchGoogleBtn = document.getElementById('search-google-btn');
 
 // Modals
 const recipeModal = document.getElementById('recipe-modal');
@@ -29,6 +35,7 @@ function init() {
     loadRecipes();
     setupEventListeners();
     renderRecipes();
+    renderRandomRecipes();
 }
 
 function loadRecipes() {
@@ -84,6 +91,14 @@ function renderRecipes() {
         return matchesCategory && matchesSearch;
     });
 
+    // Hide random recipes if searching or filtering by category
+    if (currentSearch || currentCategory !== 'all') {
+        randomContainer.style.display = 'none';
+    } else {
+        randomContainer.style.display = 'block';
+        renderRandomRecipes();
+    }
+
     recipeGrid.innerHTML = '';
     
     if (filtered.length === 0) {
@@ -118,6 +133,33 @@ function renderRecipes() {
     recipeCountText.textContent = `Tienes ${filtered.length} recetas guardadas`;
 }
 
+function renderRandomRecipes() {
+    if (recipes.length === 0) {
+        randomContainer.style.display = 'none';
+        return;
+    }
+
+    randomTrack.innerHTML = '';
+    
+    // Get up to 6 random recipes, shuffle them
+    const shuffled = [...recipes].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 6);
+
+    selected.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = 'random-card';
+        card.innerHTML = `
+            <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" alt="${recipe.name}">
+            <div class="random-card-info">
+                <span class="tag">${recipe.category}</span>
+                <h3>${recipe.name}</h3>
+            </div>
+        `;
+        card.addEventListener('click', () => viewRecipe(recipe.id));
+        randomTrack.appendChild(card);
+    });
+}
+
 // --- Actions ---
 
 function setupEventListeners() {
@@ -127,13 +169,13 @@ function setupEventListeners() {
         renderRecipes();
     });
 
-    // Sidebar Navigation
+    // Filter Navigation
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             currentCategory = item.dataset.category;
-            categoryTitle.textContent = item.querySelector('span').textContent === 'Todo' ? 'Mis Recetas' : item.querySelector('span').textContent;
+            categoryTitle.textContent = item.textContent === 'Todo' ? 'Mis Recetas' : item.textContent;
             renderRecipes();
         });
     });
@@ -142,8 +184,23 @@ function setupEventListeners() {
     addBtn.addEventListener('click', () => {
         editingRecipeId = null;
         recipeForm.reset();
+        updateImagePreview('');
         document.getElementById('modal-title').textContent = 'Nueva Receta';
         recipeModal.style.display = 'block';
+    });
+
+    // Image Preview & Google Search
+    imageInput.addEventListener('input', (e) => {
+        updateImagePreview(e.target.value);
+    });
+
+    searchGoogleBtn.addEventListener('click', () => {
+        const name = document.getElementById('recipe-name').value;
+        if (!name) {
+            alert('Por favor, escribe primero el nombre del plato para buscar imágenes.');
+            return;
+        }
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(name)}+receta&tbm=isch`, '_blank');
     });
 
     closeBtns.forEach(btn => {
@@ -226,10 +283,11 @@ function saveRecipe() {
     const ingredients = document.getElementById('recipe-ingredients').value;
     const steps = document.getElementById('recipe-steps').value;
     const video = document.getElementById('recipe-video').value;
+    const image = document.getElementById('recipe-image').value || `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`;
 
     if (editingRecipeId) {
         const index = recipes.findIndex(r => r.id === editingRecipeId);
-        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video };
+        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video, image };
     } else {
         const newRecipe = {
             id: Date.now(),
@@ -238,7 +296,7 @@ function saveRecipe() {
             ingredients,
             steps,
             video,
-            image: `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800` // Dynamic image fallback
+            image
         };
         recipes.push(newRecipe);
     }
@@ -255,8 +313,22 @@ function openEditModal(recipe) {
     document.getElementById('recipe-ingredients').value = recipe.ingredients;
     document.getElementById('recipe-steps').value = recipe.steps;
     document.getElementById('recipe-video').value = recipe.video;
+    document.getElementById('recipe-image').value = recipe.image || '';
+    updateImagePreview(recipe.image || '');
     document.getElementById('modal-title').textContent = 'Editar Receta';
     recipeModal.style.display = 'block';
+}
+
+function updateImagePreview(url) {
+    if (url) {
+        imagePreview.src = url;
+        imagePreview.style.display = 'block';
+        imagePlaceholder.style.display = 'none';
+    } else {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        imagePlaceholder.style.display = 'flex';
+    }
 }
 
 function viewRecipe(id) {

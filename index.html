@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,61 +13,65 @@
     <!-- Ionicons for Icons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="dark-theme">
-    <div id="app">
-        <aside class="sidebar">
-            <div class="logo">
-                <ion-icon name="restaurant"></ion-icon>
-                <span>Gusto</span>
+    <div id="app" class="top-nav-layout">
+        <header class="main-header glass">
+            <div class="header-content">
+                <div class="logo">
+                    <ion-icon name="restaurant"></ion-icon>
+                    <span>Gusto</span>
+                </div>
+
+                <nav class="top-nav">
+                    <div class="nav-item active" data-category="all">Todo</div>
+                    <div class="nav-item" data-category="Carnes">Carnes</div>
+                    <div class="nav-item" data-category="Pastas">Pastas</div>
+                    <div class="nav-item" data-category="Ensaladas">Ensaladas</div>
+                    <div class="nav-item" data-category="Postres">Postres</div>
+                    <div class="nav-item" data-category="Otros">Otros</div>
+                </nav>
+
+                <div class="header-actions">
+                    <div class="search-container">
+                        <ion-icon name="search-outline"></ion-icon>
+                        <input type="text" id="recipe-search" placeholder="Buscar receta...">
+                    </div>
+
+                    <button id="add-recipe-btn" class="btn-primary-sm">
+                        <ion-icon name="add-outline"></ion-icon>
+                        <span>Nueva</span>
+                    </button>
+
+                    <button id="import-json-btn" class="btn-icon-alt">
+                        <ion-icon name="code-working-outline"></ion-icon>
+                    </button>
+
+                    <!-- <div class="user-profile">
+                        <div class="avatar">U</div>
+                    </div> -->
+                </div>
             </div>
-            <nav>
-                <div class="nav-item active" data-category="all">
-                    <ion-icon name="grid-outline"></ion-icon>
-                    <span>Todo</span>
-                </div>
-                <div class="nav-item" data-category="Carnes">
-                    <ion-icon name="restaurant-outline"></ion-icon>
-                    <span>Carnes</span>
-                </div>
-                <div class="nav-item" data-category="Pastas">
-                    <ion-icon name="pizza-outline"></ion-icon>
-                    <span>Pastas</span>
-                </div>
-                <div class="nav-item" data-category="Ensaladas">
-                    <ion-icon name="leaf-outline"></ion-icon>
-                    <span>Ensaladas</span>
-                </div>
-                <div class="nav-item" data-category="Postres">
-                    <ion-icon name="ice-cream-outline"></ion-icon>
-                    <span>Postres</span>
-                </div>
-            </nav>
-            <button id="add-recipe-btn" class="btn-primary">
-                <ion-icon name="add-outline"></ion-icon>
-                <span>Nueva Receta</span>
-            </button>
-            <button id="import-json-btn" class="btn-secondary" style="margin-top: 0.75rem;">
-                <ion-icon name="code-working-outline"></ion-icon>
-                <span>Importar JSON</span>
-            </button>
-        </aside>
+        </header>
 
         <main class="content">
-            <header>
-                <div class="search-container">
-                    <ion-icon name="search-outline"></ion-icon>
-                    <input type="text" id="recipe-search" placeholder="Busca ingredientes, platos...">
+            <section class="random-recipes-container" id="random-recipes-container">
+                <div class="header-info">
+                    <h1 id="category-title">Descubre algo nuevo</h1>
+                    <p>Recetas escogidas al azar para inspirarte</p>
                 </div>
-                <div class="user-profile">
-                    <div class="avatar">U</div>
+                <div class="random-recipes-track" id="random-recipes-track">
+                    <!-- Random recipes will be injected here -->
                 </div>
-            </header>
+            </section>
 
             <section class="recipe-grid-container">
                 <div class="header-info">
-                    <h1 id="category-title">Mis Recetas</h1>
+                    <h1 id="main-grid-title">Mis Recetas</h1>
                     <p id="recipe-count">Tienes 0 recetas guardadas</p>
                 </div>
                 <div class="recipe-grid" id="recipe-grid">
@@ -104,12 +109,31 @@
                         <input type="url" id="recipe-video" placeholder="https://www.youtube.com/watch?v=...">
                     </div>
                     <div class="input-group full-width">
+                        <label for="recipe-image">URL de Imagen</label>
+                        <div class="input-with-button">
+                            <input type="url" id="recipe-image" placeholder="https://images.unsplash.com/...">
+                            <button type="button" id="search-google-btn" class="btn-secondary-sm">
+                                <ion-icon name="logo-google"></ion-icon>
+                                Buscar
+                            </button>
+                        </div>
+                        <div id="image-preview-container" class="image-preview-container">
+                            <img id="image-preview" src="" alt="Preview" style="display: none;">
+                            <div id="image-placeholder" class="image-placeholder">
+                                <ion-icon name="image-outline"></ion-icon>
+                                <span>Vista previa de la imagen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group full-width">
                         <label for="recipe-ingredients">Ingredientes</label>
-                        <textarea id="recipe-ingredients" rows="4" required placeholder="Una lista de ingredientes..."></textarea>
+                        <textarea id="recipe-ingredients" rows="4" required
+                            placeholder="Una lista de ingredientes..."></textarea>
                     </div>
                     <div class="input-group full-width">
                         <label for="recipe-steps">Pasos de Preparación</label>
-                        <textarea id="recipe-steps" rows="6" required placeholder="Describe el proceso detalladamente..."></textarea>
+                        <textarea id="recipe-steps" rows="6" required
+                            placeholder="Describe el proceso detalladamente..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -124,10 +148,12 @@
     <div id="view-modal" class="modal">
         <div class="modal-content glass detail-view">
             <div class="modal-header no-border">
-                <button type="button" class="close-modal circle"><ion-icon name="arrow-back-outline"></ion-icon></button>
+                <button type="button" class="close-modal circle"><ion-icon
+                        name="arrow-back-outline"></ion-icon></button>
                 <div class="actions">
                     <button id="edit-current-btn" class="btn-icon"><ion-icon name="create-outline"></ion-icon></button>
-                    <button id="delete-current-btn" class="btn-icon danger"><ion-icon name="trash-outline"></ion-icon></button>
+                    <button id="delete-current-btn" class="btn-icon danger"><ion-icon
+                            name="trash-outline"></ion-icon></button>
                 </div>
             </div>
             <div id="recipe-details" class="details-body">
@@ -144,9 +170,13 @@
                 <button type="button" class="close-modal"><ion-icon name="close-outline"></ion-icon></button>
             </div>
             <div class="modal-body" style="padding: 2rem;">
-                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Pega aquí el código JSON de tu receta para cargarla automáticamente.</p>
-                <textarea id="json-input" rows="12" style="width: 100%; font-family: monospace; font-size: 0.85rem;" placeholder='{ "title": "...", "ingredients": [...], "instructions": [...] }'></textarea>
-                <div id="import-error" style="color: var(--primary); margin-top: 0.5rem; font-size: 0.85rem; display: none;">Error: Formato JSON inválido o faltan campos obligatorios.</div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Pega aquí el código JSON de
+                    tu receta para cargarla automáticamente.</p>
+                <textarea id="json-input" rows="12" style="width: 100%; font-family: monospace; font-size: 0.85rem;"
+                    placeholder='{ "title": "...", "ingredients": [...], "instructions": [...] }'></textarea>
+                <div id="import-error"
+                    style="color: var(--primary); margin-top: 0.5rem; font-size: 0.85rem; display: none;">Error: Formato
+                    JSON inválido o faltan campos obligatorios.</div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary close-modal">Cancelar</button>
@@ -157,4 +187,5 @@
 
     <script src="main.js"></script>
 </body>
+
 </html>
