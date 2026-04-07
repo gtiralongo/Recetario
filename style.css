@@ -828,27 +828,56 @@ input:focus, textarea:focus {
     
     .header-actions {
         flex-wrap: nowrap;
+        gap: 0.5rem;
+    }
+    
+    .search-container {
+        flex: 1;
+        min-width: 120px;
+        padding: 0 0.75rem;
+    }
+    
+    #add-recipe-btn, .import-json-btn, .close-modal.circle, .favorite-btn-static.circle, .btn-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
     }
     
     #add-recipe-btn span {
         display: none;
     }
     
-    #add-recipe-btn {
-        width: 40px;
-        padding: 0;
-    }
-    
     .logo span {
         font-size: 1.25rem;
     }
     
+    /* Fix overlapping in Modal Detail */
+    .modal-header.no-border {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .modal-header .actions {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    #cook-mode-btn {
+        flex: 1;
+        justify-content: center;
+        height: 44px;
+    }
+    
     .detail-img {
-        height: 250px;
+        height: 220px;
     }
     
     .details-body {
-        padding: 0 1.5rem 2rem 1.5rem;
+        padding: 0 1.25rem 2rem 1.25rem;
     }
 }
 
