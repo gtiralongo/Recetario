@@ -61,62 +61,54 @@ const processJsonBtn = document.getElementById('process-json-btn');
 const jsonInput = document.getElementById('json-input');
 const importError = document.getElementById('import-error');
 
+// Toast Notification
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <ion-icon name="${type === 'success' ? 'checkmark-circle' : 'alert-circle'}"></ion-icon>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 // --- Initialization ---
 
 let plannerData = JSON.parse(localStorage.getItem('gusto_planner')) || {};
 
-function init() {
-    loadRecipes();
+async function init() {
+    await loadRecipes();
     setupEventListeners();
     switchView('home');
     renderRandomRecipes();
 }
 
-function loadRecipes() {
+async function loadRecipes() {
     const stored = localStorage.getItem('gusto_recipes');
     if (stored) {
         recipes = JSON.parse(stored);
     } else {
-        // Sample data for first time
-        recipes = [
-            {
-                id: Date.now() + 1,
-                name: 'Tacos Al Pastor',
-                category: 'Carnes',
-                video: 'https://www.youtube.com/watch?v=f-B65R8n8gU',
-                ingredients: 'Carne de cerdo, piña, tortillas, cilantro, cebolla, adobo.',
-                steps: '1. Adobar la carne.\n2. Cocinar a fuego lento.\n3. Servir en tortillas con piña.',
-                image: 'https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800',
-                time: 45,
-                difficulty: 'Media',
-                isFavorite: true
-            },
-            {
-                id: Date.now() + 2,
-                name: 'Pasta Carbonara Auténtica',
-                category: 'Pastas',
-                video: '',
-                ingredients: 'Espaguetis, guanciale, huevos, queso pecorino, pimienta negra.',
-                steps: '1. Cocer la pasta.\n2. Saltear el guanciale.\n3. Mezclar huevos y queso.\n4. Unir todo fuera del fuego.',
-                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800',
-                time: 20,
-                difficulty: 'Fácil',
-                isFavorite: false
-            },
-            {
-                id: Date.now() + 3,
-                name: 'Ensalada Burrata con Pesto',
-                category: 'Ensaladas',
-                video: 'https://www.youtube.com/watch?v=7uunR0lEqos',
-                ingredients: 'Burrata fresca, tomates cherry, pesto genovese, rúcula, aceite de oliva.',
-                steps: '1. Lavar la rúcula y ponerla de base.\n2. Colocar la burrata en el centro.\n3. Decorar con tomates y bañar en pesto.',
-                image: 'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800',
-                time: 15,
-                difficulty: 'Fácil',
-                isFavorite: false
+        try {
+            const response = await fetch('./recipes.json');
+            if (response.ok) {
+                recipes = await response.json();
+                saveToLocalStorage();
+            } else {
+                throw new Error('No se pudo cargar recipes.json');
             }
-        ];
-        saveToLocalStorage();
+        } catch (error) {
+            console.error('Error cargando recetas iniciales:', error);
+            recipes = [];
+        }
     }
 }
 
@@ -191,7 +183,7 @@ function renderRandomRecipes() {
     
     // Get up to 6 random recipes, shuffle them
     const shuffled = [...recipes].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 6);
+    const selected = shuffled.slice(0, 3);
 
     selected.forEach(recipe => {
         const card = document.createElement('div');
@@ -348,14 +340,19 @@ function setupEventListeners() {
             saveToLocalStorage();
             viewModal.style.display = 'none';
             renderRecipes();
+            showToast('Receta eliminada correctamente', 'success');
         }
     });
 
-    // JSON Import Event
+    // JSON Import/Export Events
     importBtn.addEventListener('click', () => {
         jsonInput.value = '';
         importError.style.display = 'none';
         importModal.style.display = 'block';
+    });
+
+    document.getElementById('export-json-btn').addEventListener('click', () => {
+        exportRecipes();
     });
 
     processJsonBtn.addEventListener('click', () => {
@@ -418,6 +415,7 @@ function saveRecipe() {
     saveToLocalStorage();
     renderRecipes();
     recipeModal.style.display = 'none';
+    showToast(editingRecipeId ? 'Receta actualizada' : 'Receta guardada con éxito');
 }
 
 function openEditModal(recipe) {
@@ -695,6 +693,19 @@ function getYoutubeEmbedUrl(url) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+}
+
+function exportRecipes() {
+    const dataStr = JSON.stringify(recipes, null, 4);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'recipes.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    showToast('Exportando recetario...');
 }
 
 // Kickstart
