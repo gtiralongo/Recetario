@@ -1,38 +1,41 @@
 [
     {
-        "id": 1,
+        "id": 1775581919508,
         "name": "Tacos Al Pastor",
-        "category": "Carnes",
+        "category": "Otros",
         "video": "https://www.youtube.com/watch?v=f-B65R8n8gU",
         "ingredients": "Carne de cerdo, piña, tortillas, cilantro, cebolla, adobo.",
         "steps": "1. Adobar la carne.\n2. Cocinar a fuego lento.\n3. Servir en tortillas con piña.",
-        "image": "https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800",
-        "time": 45,
-        "difficulty": "Media",
-        "isFavorite": true
+        "image": "https://images.unsplash.com/photo-1593350071499-14eafa834830?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 2,
+        "id": 1775581919509,
         "name": "Pasta Carbonara Auténtica",
         "category": "Pastas",
         "video": "",
         "ingredients": "Espaguetis, guanciale, huevos, queso pecorino, pimienta negra.",
         "steps": "1. Cocer la pasta.\n2. Saltear el guanciale.\n3. Mezclar huevos y queso.\n4. Unir todo fuera del fuego.",
-        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800",
-        "time": 20,
-        "difficulty": "Fácil",
-        "isFavorite": false
+        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&q=80&w=800"
     },
     {
-        "id": 3,
+        "id": 1775581919510,
         "name": "Ensalada Burrata con Pesto",
         "category": "Ensaladas",
         "video": "https://www.youtube.com/watch?v=7uunR0lEqos",
         "ingredients": "Burrata fresca, tomates cherry, pesto genovese, rúcula, aceite de oliva.",
         "steps": "1. Lavar la rúcula y ponerla de base.\n2. Colocar la burrata en el centro.\n3. Decorar con tomates y bañar en pesto.",
-        "image": "https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800",
-        "time": 15,
-        "difficulty": "Fácil",
+        "image": "https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        "id": 1775657753463,
+        "name": "Galletitas con chispas de chocolate🍪",
+        "category": "Postres",
+        "ingredients": "200 gr harina leudante,\n100 gr azúcar,\n1 huevo,\n100 gr manteca (pomada),\nEsencia de vainilla (a gusto),\n100 gr Chips de chocolate",
+        "steps": "1\nEn un bowl, que nos resulte cómodo y práctico, agregar primero el azúcar y la manteca bien pomada. Incorporar ambos ingredientes hasta quedar bien desarmada la manteca.\n\nFoto del paso 1 de la receta: Galletitas con chispas de chocolate🍪\n2\nLuego incorporar el huevo y la esencia de vainilla. Integrar hasta que quede una mezcla cremosa y homogénea.\n\n3\nFinalizado el paso anterior, vamos a ir incorporando la harina de a poco y tratando de formar la masa. La masa de por si les va a quedar \"blandita\" gracias a la manteca, no requiere mucho amasado. Solo unir. En medio de la incorporación de la harina, mientras la masa aún no tenga mucho cuerpo agregar los chips de chocolate, esto también a gusto gente. Yo le agregue bastantes porque me encanta el chocolate. Y me guarde algunos para ponerles a las galletitas encima antes de mandarlas al horno.\n\n4\nUna vez lista la masa, la tapan ya sea con un repasador o un papel film y lo dejan en la heladera. Yo lo dejé 10 min.\nLuego de esto armamos las gelltitas con la mano o si tienen cortantes y quieren usarlos, está perfecto también. Yo las hice a mano.\n\n5\nLuego ponerlas en una asadera o placa para horno. No hace falta enmantecarla porque la manteca de las galletitas no permite que se peguen. Llevarlas a horno precalentado y cocinarlas a fuego MEDIO, durante 15 min máximo. Todo dependerá de cada horno. El mío en 15 ya las tenía listas.\nNo las dejen pasar mucho tiempo porque se secan. Eso es todo gente. Espero las disfruten con un buen mate o de la forma que más les guste😋",
+        "video": "https://cookpad.com/ar/recetas/16781365",
+        "image": "https://www.pequerecetas.com/wp-content/uploads/2010/03/galletas-con-chispas-de-chocolate-o-chocolate-chips-cookies.jpg",
+        "time": 60,
+        "difficulty": "Media",
         "isFavorite": false
     }
 ]
