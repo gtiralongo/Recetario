@@ -1,9 +1,7 @@
-// Register Service Worker for PWA
+// SW Cleanup / Registration
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('SW Registered', reg))
-            .catch(err => console.log('SW Error', err));
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for(let registration of registrations) registration.unregister();
     });
 }
 
@@ -429,20 +427,20 @@ function setupEventListeners() {
 
     // Auth Listeners & Visibility
     if (auth) {
+        console.log('[DEBUG] Auth inicializado');
         const loginScreen = document.getElementById('login-screen');
         const appDiv = document.getElementById('app');
         const userAvatar = document.getElementById('user-avatar');
         const logoutBtn = document.getElementById('logout-btn');
 
         auth.onAuthStateChanged(user => {
+            console.log('[AUTH] Estado cambiado -> Usuario:', user ? user.uid : 'null');
+            
             if (user) {
                 isLoggedIn = true;
                 loginScreen.style.display = 'none';
                 appDiv.style.display = 'flex';
-                
-                // Update UI with user info
                 if (userAvatar) userAvatar.textContent = user.displayName ? user.displayName[0] : 'U';
-                
                 loadRecipes(); 
             } else {
                 isLoggedIn = false;
@@ -454,11 +452,17 @@ function setupEventListeners() {
         });
 
         const handleLogin = () => {
+            console.log('[DEBUG] Iniciando proceso de login...');
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithRedirect(provider).catch(err => showToast(err.message, 'error'));
+            auth.signInWithPopup(provider).catch(err => {
+                console.error('[ERROR] Login Popup falló:', err);
+                // Si falla el popup, intentamos redirect como respaldo
+                auth.signInWithRedirect(provider);
+            });
         };
 
-        document.getElementById('main-login-btn').addEventListener('click', handleLogin);
+        const mainLoginBtn = document.getElementById('main-login-btn');
+        if (mainLoginBtn) mainLoginBtn.onclick = handleLogin;
         
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -468,9 +472,16 @@ function setupEventListeners() {
             });
         }
 
-        auth.getRedirectResult().catch(err => {
-            if (err.code !== 'auth/callback-condition-not-met') console.error('Error redirect:', err);
-        });
+        // Recuperar resultado de redirect si el popup fue bloqueado o se usó de respaldo
+        auth.getRedirectResult()
+            .then(result => {
+                if (result.user) console.log('[DEBUG] Login exitoso vía redirect');
+            })
+            .catch(err => {
+                if (err.code !== 'auth/callback-condition-not-met') {
+                    console.error('[ERROR] Error en redirect result:', err);
+                }
+            });
     }
 }
 
