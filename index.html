@@ -17,10 +17,33 @@
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK (Compat version for easier Vanilla integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 
 <body class="dark-theme">
-    <div id="app" class="top-nav-layout">
+    <!-- Login Screen Overlay -->
+    <div id="login-screen" class="auth-overlay">
+        <div class="auth-card glass">
+            <div class="auth-logo">
+                <ion-icon name="restaurant"></ion-icon>
+                <span>Gusto</span>
+            </div>
+            <h1>Bienvenido a tu Recetario</h1>
+            <p>Guarda y organiza tus platos favoritos de forma privada y segura en la nube.</p>
+            <button id="main-login-btn" class="btn-primary">
+                <ion-icon name="logo-google"></ion-icon>
+                <span>Entrar con Google</span>
+            </button>
+            <div class="auth-footer">
+                Tus recetas se sincronizan automáticamente en todos tus dispositivos.
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="top-nav-layout" style="display: none;">
         <header class="main-header glass">
             <div class="header-content">
                 <div class="logo">
@@ -83,11 +106,13 @@
                         <button id="export-json-btn" class="btn-icon-alt" title="Exportar JSON">
                             <ion-icon name="download-outline"></ion-icon>
                         </button>
-                    </div>
 
-                    <!-- <div class="user-profile">
-                        <div class="avatar">U</div>
-                    </div> -->
+                    <div class="user-profile">
+                        <div class="avatar" id="user-avatar">U</div>
+                        <button id="logout-btn" class="btn-icon-alt" title="Cerrar sesión">
+                            <ion-icon name="log-out-outline"></ion-icon>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>

@@ -12,7 +12,27 @@ let recipes = [];
 let currentCategory = 'all';
 let currentSearch = '';
 let editingRecipeId = null;
-let currentView = 'home'; // home, favorites, planner, shopping
+let currentView = 'home';
+let isLoggedIn = false;
+
+// --- Firebase Configuration (FILL THIS WITH YOUR DATA) ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDJLupBIAcg3ak72yzTCojgfXUiVJb5-tA",
+    authDomain: "gusto---recetario.firebaseapp.com",
+    databaseURL: "https://gusto---recetario-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "gusto---recetario",
+    storageBucket: "gusto---recetario.firebasestorage.app",
+    messagingSenderId: "966929495219",
+    appId: "1:966929495219:web:785adead1c98edb28cacc6",
+    measurementId: "G-FQMS8GMCGL"
+};
+
+// Initialize Firebase
+if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database ? firebase.database() : null;
+const auth = firebase.auth ? firebase.auth() : null;
 
 // DOM Elements
 const recipeGrid = document.getElementById('recipe-grid');
@@ -93,27 +113,48 @@ async function init() {
 }
 
 async function loadRecipes() {
-    const stored = localStorage.getItem('gusto_recipes');
-    if (stored) {
-        recipes = JSON.parse(stored);
-    } else {
-        try {
-            const response = await fetch('./recipes.json');
-            if (response.ok) {
+    if (!db || !auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    // Load from Firebase under the user's private path
+    try {
+        const snapshot = await db.ref(`users/${userId}/recipes`).once('value');
+        const data = snapshot.val();
+        if (data) {
+            recipes = Object.values(data);
+        } else {
+            // If NEW user, seed with default recipes from recipes.json
+            const response = await fetch('./recipes.json').catch(() => null);
+            if (response && response.ok) {
                 recipes = await response.json();
-                saveToLocalStorage();
-            } else {
-                throw new Error('No se pudo cargar recipes.json');
+                saveToDatabase(); 
             }
-        } catch (error) {
-            console.error('Error cargando recetas iniciales:', error);
-            recipes = [];
         }
+        localStorage.setItem(`gusto_recipes_${userId}`, JSON.stringify(recipes));
+        renderRecipes();
+    } catch (error) {
+        console.error('Error cargando desde Firebase:', error);
     }
 }
 
+function saveToDatabase() {
+    if (!auth.currentUser) return;
+    
+    const userId = auth.currentUser.uid;
+    if (db) {
+        const recipesObj = {};
+        recipes.forEach(r => { recipesObj[r.id] = r; });
+        
+        db.ref(`users/${userId}/recipes`).set(recipesObj)
+            .then(() => console.log('Sincronizado con Firebase'))
+            .catch(err => showToast('Error al sincronizar: ' + err.message, 'error'));
+    }
+    
+    localStorage.setItem(`gusto_recipes_${userId}`, JSON.stringify(recipes));
+}
+
 function saveToLocalStorage() {
-    localStorage.setItem('gusto_recipes', JSON.stringify(recipes));
+    saveToDatabase();
 }
 
 // --- Rendering ---
@@ -283,6 +324,7 @@ function setupEventListeners() {
 
     // Modals
     addBtn.addEventListener('click', () => {
+        if (!checkAuth()) return;
         editingRecipeId = null;
         recipeForm.reset();
         updateImagePreview('');
@@ -327,6 +369,7 @@ function setupEventListeners() {
 
     // View Modal Actions
     document.getElementById('edit-current-btn').addEventListener('click', () => {
+        if (!checkAuth()) return;
         const r = recipes.find(rec => rec.id === editingRecipeId);
         if (r) {
             viewModal.style.display = 'none';
@@ -335,6 +378,7 @@ function setupEventListeners() {
     });
 
     document.getElementById('delete-current-btn').addEventListener('click', () => {
+        if (!checkAuth()) return;
         if (confirm('¿Estás seguro de que quieres borrar esta receta?')) {
             recipes = recipes.filter(rec => rec.id !== editingRecipeId);
             saveToLocalStorage();
@@ -346,6 +390,7 @@ function setupEventListeners() {
 
     // JSON Import/Export Events
     importBtn.addEventListener('click', () => {
+        if (!checkAuth()) return;
         jsonInput.value = '';
         importError.style.display = 'none';
         importModal.style.display = 'block';
@@ -381,7 +426,55 @@ function setupEventListeners() {
             importError.style.display = 'block';
         }
     });
+
+    // Auth Listeners & Visibility
+    if (auth) {
+        const loginScreen = document.getElementById('login-screen');
+        const appDiv = document.getElementById('app');
+        const userAvatar = document.getElementById('user-avatar');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                isLoggedIn = true;
+                loginScreen.style.display = 'none';
+                appDiv.style.display = 'flex';
+                
+                // Update UI with user info
+                if (userAvatar) userAvatar.textContent = user.displayName ? user.displayName[0] : 'U';
+                
+                loadRecipes(); 
+            } else {
+                isLoggedIn = false;
+                loginScreen.style.display = 'flex';
+                appDiv.style.display = 'none';
+                recipes = [];
+                renderRecipes();
+            }
+        });
+
+        const handleLogin = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithRedirect(provider).catch(err => showToast(err.message, 'error'));
+        };
+
+        document.getElementById('main-login-btn').addEventListener('click', handleLogin);
+        
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    showToast('Sesión cerrada');
+                });
+            });
+        }
+
+        auth.getRedirectResult().catch(err => {
+            if (err.code !== 'auth/callback-condition-not-met') console.error('Error redirect:', err);
+        });
+    }
 }
+
+function checkAuth() { return isLoggedIn; }
 
 function saveRecipe() {
     const name = document.getElementById('recipe-name').value;
@@ -487,6 +580,7 @@ function viewRecipe(id) {
     }
 
     favoriteCurrentBtn.onclick = () => {
+        if (!checkAuth()) return;
         toggleFavorite(recipe.id);
         // Refresh local UI
         const updated = recipes.find(r => r.id === recipe.id);
@@ -503,6 +597,7 @@ function viewRecipe(id) {
 }
 
 function toggleFavorite(id) {
+    if (!checkAuth()) return;
     const index = recipes.findIndex(r => r.id === id);
     if (index !== -1) {
         recipes[index].isFavorite = !recipes[index].isFavorite;
