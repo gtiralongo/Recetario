@@ -88,7 +88,6 @@ const cookOverlay = document.getElementById('cook-overlay');
 const exitCookBtn = document.getElementById('exit-cook-btn');
 const cookModeBtn = document.getElementById('cook-mode-btn');
 const shareRecipeBtn = document.getElementById('share-recipe-btn');
-const deleteCurrentBtn = document.getElementById('delete-current-btn');
 const editCurrentBtn = document.getElementById('edit-current-btn');
 const favoriteCurrentBtn = document.getElementById('favorite-current-btn');
 
@@ -424,8 +423,20 @@ function setupEventListeners() {
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
+            
+            const isEditingModalOpen = recipeModal.style.display === 'block';
+            const isViewModalOpen = viewModal.style.display === 'block';
+            
+            if (isViewModalOpen) {
+                editingRecipeId = null; // We are truly exiting the view
+            }
+
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-            document.body.style.overflow = 'auto'; // Fix scroll bug
+            document.body.style.overflow = 'auto';
+
+            if (isEditingModalOpen && editingRecipeId) {
+                viewRecipe(editingRecipeId); // Return to view if we were editing and cancelled
+            }
         };
     });
 
@@ -458,6 +469,11 @@ function setupEventListeners() {
     cookModeBtn?.addEventListener('click', () => {
         const r = recipes.find(rec => rec.id === editingRecipeId);
         if (r) openCookMode(r);
+    });
+
+    shareRecipeBtn?.addEventListener('click', () => {
+        const r = recipes.find(rec => rec.id === editingRecipeId);
+        if (r) shareRecipe(r);
     });
 
     // JSON Actions from Menu
@@ -506,7 +522,6 @@ function checkAuth() { return isLoggedIn; }
 
 function saveRecipe() {
     const name = document.getElementById('recipe-name').value;
-    const tagsStr = document.getElementById('recipe-tags').value;
     const ingredients = document.getElementById('recipe-ingredients').value;
     const steps = document.getElementById('recipe-steps').value;
     const video = document.getElementById('recipe-video').value;
@@ -532,6 +547,12 @@ function saveRecipe() {
     saveToLocalStorage();
     renderRecipes();
     recipeModal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Default state
+
+    if (editingRecipeId) {
+        viewRecipe(editingRecipeId); // Return to view after edit
+    }
+    
     showToast(editingRecipeId ? 'Receta actualizada' : 'Receta guardada con éxito');
 }
 
@@ -550,7 +571,6 @@ function updateImagePreview(url) {
 function openEditModal(recipe) {
     editingRecipeId = recipe.id;
     document.getElementById('recipe-name').value = recipe.name;
-    document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
     document.getElementById('recipe-ingredients').value = recipe.ingredients;
     document.getElementById('recipe-steps').value = recipe.steps;
     document.getElementById('recipe-video').value = recipe.video;
