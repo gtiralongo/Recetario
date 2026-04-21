@@ -7,7 +7,8 @@ if ('serviceWorker' in navigator) {
 
 // Recipe Data Management
 let recipes = [];
-let currentCategory = 'all';
+let userTags = ['Carnes', 'Pastas', 'Ensaladas', 'Postres', 'Otros']; // Default tags
+let currentTag = 'all';
 let currentSearch = '';
 let editingRecipeId = null;
 let currentView = 'home';
@@ -31,6 +32,29 @@ if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database ? firebase.database() : null;
+// --- Tags Dropdown Management ---
+function initTagsDropdown() {
+    renderTagDropdowns();
+}
+
+function renderTagDropdowns() {
+    tagOptionsLists.forEach(list => {
+        if (!list) return;
+        let html = `<li onclick="filterByTag('all')">${list.id.includes('mobile') ? 'Todas' : 'Todas las Tags'}</li>`;
+        userTags.forEach(tag => {
+            html += `<li onclick="filterByTag('${tag}')">${tag}</li>`;
+        });
+        list.innerHTML = html;
+    });
+}
+
+function filterByTag(tag) {
+    currentTag = tag;
+    tagLabels.forEach(label => {
+        if (label) label.textContent = tag === 'all' ? 'Todas las Tags' : tag;
+    });
+    renderRecipes();
+}
 const auth = firebase.auth ? firebase.auth() : null;
 
 // DOM Elements
@@ -72,13 +96,16 @@ const favoriteCurrentBtn = document.getElementById('favorite-current-btn');
 const recipeModal = document.getElementById('recipe-modal');
 const viewModal = document.getElementById('view-modal');
 const recipeForm = document.getElementById('recipe-form');
-const addBtn = document.getElementById('add-recipe-btn');
-const importBtn = document.getElementById('import-json-btn');
 const closeBtns = document.querySelectorAll('.close-modal');
 const importModal = document.getElementById('import-modal');
 const processJsonBtn = document.getElementById('process-json-btn');
 const jsonInput = document.getElementById('json-input');
 const importError = document.getElementById('import-error');
+
+// Tag Dropdowns (Desktop & Mobile)
+const tagContainers = [document.getElementById('tag-dropdown-desktop'), document.getElementById('tag-dropdown-mobile')];
+const tagOptionsLists = [document.getElementById('tag-options-desktop'), document.getElementById('tag-options-mobile')];
+const tagLabels = [document.getElementById('current-tag-label-desktop')]; // Only desktop has a label span
 
 // Toast Notification
 function showToast(message, type = 'success') {
@@ -105,27 +132,74 @@ function showToast(message, type = 'success') {
 let plannerData = JSON.parse(localStorage.getItem('gusto_planner')) || {};
 
 async function init() {
-    await loadRecipes();
+    await loadData();
     setupEventListeners();
     switchView('home');
     renderRandomRecipes();
+}
+
+async function loadData() {
+    if (!db || !auth.currentUser) return;
+    const userId = auth.currentUser.uid;
+    
+    // Load Tags
+    try {
+        const tagSnapshot = await db.ref(`users/${userId}/tags`).once('value');
+        const tagData = tagSnapshot.val();
+        if (tagData) {
+            userTags = tagData;
+        } else {
+            // Seed default tags
+            db.ref(`users/${userId}/tags`).set(userTags);
+        }
+        renderTagDropdowns();
+    } catch (error) {
+        console.error('Error cargando tags:', error);
+    }
+
+    // Load Recipes
+    await loadRecipes();
+}
+
+function renderFormTagSelector(selectedTags = []) {
+    const container = document.getElementById('form-tag-selector');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    userTags.forEach(tag => {
+        const btn = document.createElement('div');
+        btn.className = `form-tag-item ${selectedTags.includes(tag) ? 'selected' : ''}`;
+        btn.textContent = tag;
+        btn.dataset.tag = tag;
+        btn.onclick = () => btn.classList.toggle('selected');
+        container.appendChild(btn);
+    });
 }
 
 async function loadRecipes() {
     if (!db || !auth.currentUser) return;
 
     const userId = auth.currentUser.uid;
-    // Load from Firebase under the user's private path
     try {
         const snapshot = await db.ref(`users/${userId}/recipes`).once('value');
         const data = snapshot.val();
         if (data) {
-            recipes = Object.values(data);
+            recipes = Object.values(data).map(r => {
+                // Migration: if it has category but no tags, convert
+                if (r.category && (!r.tags || r.tags.length === 0)) {
+                    r.tags = [r.category];
+                }
+                if (!r.tags) r.tags = [];
+                return r;
+            });
         } else {
-            // If NEW user, seed with default recipes from recipes.json
             const response = await fetch('./recipes.json').catch(() => null);
             if (response && response.ok) {
                 recipes = await response.json();
+                recipes = recipes.map(r => {
+                    if (r.category && !r.tags) r.tags = [r.category];
+                    return r;
+                });
                 saveToDatabase();
             }
         }
@@ -160,15 +234,14 @@ function saveToLocalStorage() {
 
 function renderRecipes() {
     const filtered = recipes.filter(r => {
-        const matchesCategory = currentCategory === 'all' || r.category === currentCategory;
+        const matchesTag = currentTag === 'all' || (r.tags && r.tags.includes(currentTag));
         const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
             r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
         const matchesView = currentView === 'home' || (currentView === 'favorites' && r.isFavorite);
-        return matchesCategory && matchesSearch && matchesView;
+        return matchesTag && matchesSearch && matchesView;
     });
 
-    // Hide random recipes if searching, filtering by category, or not in home view
-    if (currentSearch || currentCategory !== 'all' || currentView !== 'home') {
+    if (currentSearch || currentTag !== 'all' || currentView !== 'home') {
         randomContainer.style.display = 'none';
     } else {
         randomContainer.style.display = 'block';
@@ -176,7 +249,6 @@ function renderRecipes() {
     }
 
     recipeGrid.innerHTML = '';
-
     if (filtered.length === 0) {
         recipeGrid.innerHTML = `
             <div class="no-recipes">
@@ -189,16 +261,17 @@ function renderRecipes() {
     filtered.forEach(recipe => {
         const card = document.createElement('div');
         card.className = 'recipe-card';
+        const displayTags = (recipe.tags || []).slice(0, 2).map(t => `<span class="tag">${t}</span>`).join('');
         card.innerHTML = `
-            <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" class="recipe-img" alt="${recipe.name}">
-            <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${recipe.id})">
-                <ion-icon name="${recipe.isFavorite ? 'star' : 'star-outline'}"></ion-icon>
-            </button>
-            ${recipe.video ? '<div class="video-badge"><ion-icon name="play"></ion-icon></div>' : ''}
+            <div class="recipe-card-img-container">
+                <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" class="recipe-img" alt="${recipe.name}">
+                <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${recipe.id})">
+                    <ion-icon name="${recipe.isFavorite ? 'star' : 'star-outline'}"></ion-icon>
+                </button>
+                ${recipe.video ? '<div class="video-badge"><ion-icon name="play"></ion-icon></div>' : ''}
+            </div>
             <div class="recipe-info">
-                <div class="recipe-tags">
-                    <span class="tag">${recipe.category}</span>
-                </div>
+                <div class="recipe-tags">${displayTags}</div>
                 <h3>${recipe.name}</h3>
                 <div class="recipe-meta">
                     <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '--'} min</span>
@@ -218,21 +291,20 @@ function renderRandomRecipes() {
         randomContainer.style.display = 'none';
         return;
     }
-
     randomTrack.innerHTML = '';
     if (randomCarouselInterval) clearInterval(randomCarouselInterval);
 
-    // Get up to 6 random recipes, shuffle them
     const shuffled = [...recipes].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 3);
+    const selected = shuffled.slice(0, 5); // 5 recipes for a better carousel
 
     selected.forEach(recipe => {
         const card = document.createElement('div');
         card.className = 'random-card';
+        const displayTag = (recipe.tags && recipe.tags[0]) ? `<span class="tag">${recipe.tags[0]}</span>` : '';
         card.innerHTML = `
             <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" alt="${recipe.name}">
             <div class="random-card-info">
-                <span class="tag">${recipe.category}</span>
+                <div class="recipe-tags">${displayTag}</div>
                 <h3>${recipe.name}</h3>
             </div>
         `;
@@ -240,12 +312,14 @@ function renderRandomRecipes() {
         randomTrack.appendChild(card);
     });
 
-    let currentSlide = 0;
-    if (selected.length > 1) {
+    // Auto scroll logic (Web only, mobile uses native snap)
+    if (window.innerWidth > 768 && selected.length > 1) {
+        let currentSlide = 0;
         randomCarouselInterval = setInterval(() => {
             currentSlide = (currentSlide + 1) % selected.length;
+            const cardWidth = randomTrack.querySelector('.random-card').offsetWidth + 24; // Width + gap
             randomTrack.scrollTo({
-                left: randomTrack.offsetWidth * currentSlide,
+                left: cardWidth * currentSlide,
                 behavior: 'smooth'
             });
         }, 5000);
@@ -255,132 +329,125 @@ function renderRandomRecipes() {
 // --- Actions ---
 
 function setupEventListeners() {
-    // Search
-    searchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value;
-        renderRecipes();
+    tagContainers.forEach(container => {
+        const trigger = container?.querySelector('.dropdown-trigger');
+        trigger?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = container.classList.contains('active');
+            // Close all first
+            document.querySelectorAll('.custom-dropdown, .avatar-container').forEach(el => el.classList.remove('active'));
+            if (!isActive) container.classList.add('active');
+        });
     });
 
-    // Custom Mobile Category Dropdown
-    const dropdown = document.getElementById('category-dropdown');
-    const dropdownTrigger = dropdown?.querySelector('.dropdown-trigger');
-    const dropdownOptions = dropdown?.querySelectorAll('.dropdown-options li');
-    const currentCategoryLabel = document.getElementById('current-category-label');
-
-    if (dropdownTrigger) {
-        dropdownTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
-    }
-
-    if (dropdownOptions) {
-        dropdownOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const category = option.dataset.category;
-                currentCategory = category;
-                if (currentCategoryLabel) {
-                    currentCategoryLabel.textContent = option.textContent;
-                }
-                dropdown.classList.remove('active');
-                switchView('home');
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-dropdown')) {
+            tagContainers.forEach(c => c?.classList.remove('active'));
+        }
+    });
+    // Search (Desktop + Mobile)
+    const searchInputs = [document.getElementById('recipe-search'), document.getElementById('recipe-search-mobile')];
+    searchInputs.forEach(inp => {
+        if (inp) {
+            inp.addEventListener('input', (e) => {
+                currentSearch = e.target.value;
+                // Sync values
+                searchInputs.forEach(other => { if (other !== inp) other.value = currentSearch; });
                 renderRecipes();
             });
-        });
-    }
-
-    // Close dropdown on click outside
-    window.addEventListener('click', () => {
-        if (dropdown) dropdown.classList.remove('active');
+        }
     });
 
-    // Filter Navigation (Icons)
-    navItems.forEach(item => {
+    // Avatar Dropdown (Click to toggle)
+    document.querySelectorAll('.avatar-container').forEach(container => {
+        const avatar = container.querySelector('.avatar');
+        avatar?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            container.classList.toggle('active');
+            // Close others
+            document.querySelectorAll('.avatar-container').forEach(c => { if(c !== container) c.classList.remove('active'); });
+            document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('active'));
+        });
+    });
+
+    // Close all dropdowns on click outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-dropdown') && !e.target.closest('.avatar-container')) {
+            document.querySelectorAll('.custom-dropdown, .avatar-container').forEach(el => el.classList.remove('active'));
+        }
+    });
+
+    // Navigation Items
+    const allNavItems = document.querySelectorAll('.nav-item');
+    allNavItems.forEach(item => {
         item.addEventListener('click', () => {
             const view = item.dataset.view;
-            const category = item.dataset.category;
-
-            if (category) {
-                currentCategory = category;
-                // Sync mobile label
-                if (currentCategoryLabel) {
-                    const matchingOption = Array.from(dropdownOptions || []).find(opt => opt.dataset.category === category);
-                    if (matchingOption) currentCategoryLabel.textContent = matchingOption.textContent;
-                }
-            }
-
-            if (view) {
-                switchView(view);
-            }
-
-            renderRecipes();
+            if (view) switchView(view);
         });
     });
 
-    // Cooking Mode & Share
-    cookModeBtn.addEventListener('click', () => {
-        const r = recipes.find(rec => rec.id === editingRecipeId);
-        if (r) openCookMode(r);
+    // Add Recipe Buttons
+    const addBtns = [document.getElementById('add-recipe-btn-desktop'), document.getElementById('add-recipe-btn-mobile')];
+    addBtns.forEach(btn => {
+        btn?.addEventListener('click', () => {
+            if (!checkAuth()) return;
+            editingRecipeId = null;
+            recipeForm.reset();
+            updateImagePreview('');
+            renderFormTagSelector([]); // New: Clean tag selection
+            document.getElementById('modal-title').textContent = 'Nueva Receta';
+            recipeModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
     });
 
-    shareRecipeBtn.addEventListener('click', () => {
-        const r = recipes.find(rec => rec.id === editingRecipeId);
-        if (r) shareRecipe(r);
+    // Tag Management Actions
+    document.querySelectorAll('.manage-tags-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.getElementById('tags-modal').style.display = 'block';
+            renderTagsManager();
+        };
     });
 
-    exitCookBtn.addEventListener('click', () => {
-        cookOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    });
-
-    // Modals
-    addBtn.addEventListener('click', () => {
-        if (!checkAuth()) return;
-        editingRecipeId = null;
-        recipeForm.reset();
-        updateImagePreview('');
-        document.getElementById('modal-title').textContent = 'Nueva Receta';
-        recipeModal.style.display = 'block';
-    });
-
-    // Image Preview & Google Search
-    imageInput.addEventListener('input', (e) => {
-        updateImagePreview(e.target.value);
-    });
-
-    searchGoogleBtn.addEventListener('click', () => {
-        const name = document.getElementById('recipe-name').value;
-        if (!name) {
-            alert('Por favor, escribe primero el nombre del plato para buscar imágenes.');
-            return;
+    document.getElementById('add-tag-btn').onclick = () => {
+        const name = document.getElementById('new-tag-name').value.trim();
+        if (name && !userTags.includes(name)) {
+            userTags.push(name);
+            saveTags();
+            document.getElementById('new-tag-name').value = '';
+            renderTagsManager();
+            renderTagDropdowns();
         }
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(name)}+receta&tbm=isch`, '_blank');
+    };
+
+    // Universal Modal closer
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            document.body.style.overflow = 'auto'; // Fix scroll bug
+        };
     });
 
-    closeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            recipeModal.style.display = 'none';
-            viewModal.style.display = 'none';
-            importModal.style.display = 'none';
-            importError.style.display = 'none';
-        });
-    });
+    // Cook Overlay closer
+    document.getElementById('exit-cook-btn').onclick = () => {
+        document.getElementById('cook-overlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    };
 
-    window.addEventListener('click', (e) => {
-        if (e.target === recipeModal) recipeModal.style.display = 'none';
-        if (e.target === viewModal) viewModal.style.display = 'none';
-        if (e.target === importModal) importModal.style.display = 'none';
-    });
+    // Planner Search
+    document.getElementById('planner-search-input').oninput = (e) => {
+        renderPlannerSelectorList(e.target.value);
+    };
 
     // Form Submission
-    recipeForm.addEventListener('submit', (e) => {
+    recipeForm.onsubmit = (e) => {
         e.preventDefault();
         saveRecipe();
-    });
+    };
 
-    // View Modal Actions
-    document.getElementById('edit-current-btn').addEventListener('click', () => {
-        if (!checkAuth()) return;
+    // Modal Actions (Edit)
+    editCurrentBtn?.addEventListener('click', () => {
         const r = recipes.find(rec => rec.id === editingRecipeId);
         if (r) {
             viewModal.style.display = 'none';
@@ -388,113 +455,50 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('delete-current-btn').addEventListener('click', () => {
-        if (!checkAuth()) return;
-        if (confirm('¿Estás seguro de que quieres borrar esta receta?')) {
-            recipes = recipes.filter(rec => rec.id !== editingRecipeId);
-            saveToLocalStorage();
-            viewModal.style.display = 'none';
-            renderRecipes();
-            showToast('Receta eliminada correctamente', 'success');
-        }
+    cookModeBtn?.addEventListener('click', () => {
+        const r = recipes.find(rec => rec.id === editingRecipeId);
+        if (r) openCookMode(r);
     });
 
-    // JSON Import/Export Events
-    importBtn.addEventListener('click', () => {
-        if (!checkAuth()) return;
-        jsonInput.value = '';
-        importError.style.display = 'none';
-        importModal.style.display = 'block';
+    // JSON Actions from Menu
+    document.querySelectorAll('.import-json-btn-menu').forEach(btn => {
+        btn.onclick = () => {
+            jsonInput.value = '';
+            importModal.style.display = 'block';
+        };
     });
 
-    document.getElementById('export-json-btn').addEventListener('click', () => {
-        exportRecipes();
+    document.querySelectorAll('.export-json-btn-menu').forEach(btn => {
+        btn.onclick = exportRecipes;
     });
 
-    processJsonBtn.addEventListener('click', () => {
-        try {
-            const data = JSON.parse(jsonInput.value);
-            if (!data.title || !data.ingredients || !data.instructions) {
-                throw new Error('Faltan campos (title, ingredients o instructions)');
-            }
+    processJsonBtn.onclick = processImportedJson;
 
-            const newRecipe = {
-                id: Date.now(),
-                name: data.title,
-                category: data.category || 'Otros',
-                ingredients: Array.isArray(data.ingredients) ? data.ingredients.join('\n') : data.ingredients,
-                steps: Array.isArray(data.instructions) ? data.instructions.join('\n') : data.instructions,
-                video: data.video || '',
-                image: `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`
-            };
-
-            recipes.push(newRecipe);
-            saveToLocalStorage();
-            renderRecipes();
-            importModal.style.display = 'none';
-        } catch (e) {
-            importError.textContent = 'Error: ' + e.message;
-            importError.style.display = 'block';
-        }
-    });
-
-    // Auth Listeners & Visibility
+    // Auth Listeners
     if (auth) {
-        console.log('[DEBUG] Auth inicializado');
-        const loginScreen = document.getElementById('login-screen');
-        const appDiv = document.getElementById('app');
-        const userAvatar = document.getElementById('user-avatar');
-        const logoutBtn = document.getElementById('logout-btn');
-
         auth.onAuthStateChanged(user => {
-            console.log('[AUTH] Estado cambiado -> Usuario:', user ? user.uid : 'null');
-
+            const loginScreen = document.getElementById('login-screen');
+            const appDiv = document.getElementById('app');
             if (user) {
                 isLoggedIn = true;
                 loginScreen.style.display = 'none';
                 appDiv.style.display = 'flex';
-                if (userAvatar) userAvatar.textContent = user.displayName ? user.displayName[0] : 'U';
-                loadRecipes();
+                document.getElementById('user-avatar').textContent = user.displayName ? user.displayName[0] : 'U';
+                document.getElementById('user-avatar-mobile').textContent = user.displayName ? user.displayName[0] : 'U';
+                loadData();
             } else {
                 isLoggedIn = false;
                 loginScreen.style.display = 'flex';
                 appDiv.style.display = 'none';
-                recipes = [];
-                renderRecipes();
             }
         });
-
-        const handleLogin = () => {
-            console.log('[DEBUG] Iniciando proceso de login...');
+        document.getElementById('main-login-btn').onclick = () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => {
-                console.error('[ERROR] Login Popup falló:', err);
-                // Si falla el popup, intentamos redirect como respaldo
-                auth.signInWithRedirect(provider);
-            });
+            auth.signInWithPopup(provider);
         };
-
-        const mainLoginBtn = document.getElementById('main-login-btn');
-        if (mainLoginBtn) mainLoginBtn.onclick = handleLogin;
-
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                auth.signOut().then(() => {
-                    showToast('Sesión cerrada');
-                });
-            });
-        }
-
-        // Recuperar resultado de redirect si el popup fue bloqueado o se usó de respaldo
-        auth.getRedirectResult()
-            .then(result => {
-                if (result.user) console.log('[DEBUG] Login exitoso vía redirect');
-            })
-            .catch(err => {
-                if (err.code !== 'auth/callback-condition-not-met') {
-                    console.error('[ERROR] Error en redirect result:', err);
-                }
-            });
+        document.querySelectorAll('.logout-btn').forEach(btn => {
+            btn.onclick = () => auth.signOut();
+        });
     }
 }
 
@@ -502,7 +506,7 @@ function checkAuth() { return isLoggedIn; }
 
 function saveRecipe() {
     const name = document.getElementById('recipe-name').value;
-    const category = document.getElementById('recipe-category').value;
+    const tagsStr = document.getElementById('recipe-tags').value;
     const ingredients = document.getElementById('recipe-ingredients').value;
     const steps = document.getElementById('recipe-steps').value;
     const video = document.getElementById('recipe-video').value;
@@ -510,20 +514,16 @@ function saveRecipe() {
     const time = parseInt(document.getElementById('recipe-time').value) || 30;
     const difficulty = document.getElementById('recipe-difficulty').value;
 
+    const tags = Array.from(document.querySelectorAll('.form-tag-item.selected'))
+                     .map(el => el.dataset.tag);
+
     if (editingRecipeId) {
         const index = recipes.findIndex(r => r.id === editingRecipeId);
-        recipes[index] = { ...recipes[index], name, category, ingredients, steps, video, image, time, difficulty };
+        recipes[index] = { ...recipes[index], name, tags, ingredients, steps, video, image, time, difficulty };
     } else {
         const newRecipe = {
             id: Date.now(),
-            name,
-            category,
-            ingredients,
-            steps,
-            video,
-            image,
-            time,
-            difficulty,
+            name, tags, ingredients, steps, video, image, time, difficulty,
             isFavorite: false
         };
         recipes.push(newRecipe);
@@ -533,22 +533,6 @@ function saveRecipe() {
     renderRecipes();
     recipeModal.style.display = 'none';
     showToast(editingRecipeId ? 'Receta actualizada' : 'Receta guardada con éxito');
-}
-
-function openEditModal(recipe) {
-    editingRecipeId = recipe.id;
-    document.getElementById('recipe-name').value = recipe.name;
-    document.getElementById('recipe-category').value = recipe.category;
-    document.getElementById('recipe-ingredients').value = recipe.ingredients;
-    document.getElementById('recipe-steps').value = recipe.steps;
-    document.getElementById('recipe-video').value = recipe.video;
-    document.getElementById('recipe-image').value = recipe.image || '';
-    document.getElementById('recipe-time').value = recipe.time || '';
-    document.getElementById('recipe-difficulty').value = recipe.difficulty || 'Media';
-
-    updateImagePreview(recipe.image || '');
-    document.getElementById('modal-title').textContent = 'Editar Receta';
-    recipeModal.style.display = 'block';
 }
 
 function updateImagePreview(url) {
@@ -563,35 +547,89 @@ function updateImagePreview(url) {
     }
 }
 
-function viewRecipe(id) {
+function openEditModal(recipe) {
+    editingRecipeId = recipe.id;
+    document.getElementById('recipe-name').value = recipe.name;
+    document.getElementById('recipe-tags').value = (recipe.tags || []).join(', ');
+    document.getElementById('recipe-ingredients').value = recipe.ingredients;
+    document.getElementById('recipe-steps').value = recipe.steps;
+    document.getElementById('recipe-video').value = recipe.video;
+    document.getElementById('recipe-image').value = recipe.image || '';
+    document.getElementById('recipe-time').value = recipe.time || '';
+    document.getElementById('recipe-difficulty').value = recipe.difficulty || 'Media';
+
+    updateImagePreview(recipe.image || '');
+    renderFormTagSelector(recipe.tags || []); // Fill with existing tags
+    document.getElementById('modal-title').textContent = 'Editar Receta';
+    recipeModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+function viewRecipe(id) {
     editingRecipeId = id;
     const recipe = recipes.find(r => r.id === id);
     if (!recipe) return;
 
     const detailsContainer = document.getElementById('recipe-details');
     const embedUrl = getYoutubeEmbedUrl(recipe.video);
+    const tagsHtml = (recipe.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
     detailsContainer.innerHTML = `
-        <div class="detail-header-info">
-            <span class="tag">${recipe.category}</span>
-            <h2>${recipe.name}</h2>
-        </div>
-        
-        <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" class="detail-img" alt="${recipe.name}">
-        
-        <h3 class="section-title">Ingredientes</h3>
-        <p class="ingredients-list">${recipe.ingredients}</p>
-        
-        <h3 class="section-title">Preparación</h3>
-        <p class="steps-list">${recipe.steps}</p>
-        
-        ${embedUrl ? `
-            <h3 class="section-title">Video Tutorial</h3>
-            <div class="video-container">
-                <iframe src="${embedUrl}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="detail-body">
+            <div class="detail-hero">
+                <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" alt="${recipe.name}">
+                <div class="detail-hero-overlay"></div>
             </div>
-        ` : ''}
+            
+            <div class="detail-content">
+                <div class="detail-header-info">
+                    <div class="recipe-tags" style="margin-bottom: 1rem;">${tagsHtml}</div>
+                    <h1>${recipe.name}</h1>
+                    <div class="detail-meta-row">
+                        <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '--'} min</span>
+                        <span><ion-icon name="bar-chart-outline"></ion-icon> ${recipe.difficulty || 'Media'}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3 class="detail-section-title">Ingredientes</h3>
+                    <div class="detail-ingredients">${recipe.ingredients.replace(/\n/g, '<br>')}</div>
+                </div>
+
+                <div class="detail-section">
+                    <h3 class="detail-section-title">Preparación</h3>
+                    <div class="detail-steps">${(recipe.steps || recipe.preparation || '').replace(/\n/g, '<br>')}</div>
+                </div>
+
+                ${embedUrl ? `
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">Video Tutorial</h3>
+                        <div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 20px; border: 1px solid var(--border-color);">
+                            <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="detail-footer">
+                    <button class="btn-danger-outline" id="delete-recipe-permanent">
+                        <ion-icon name="trash-outline"></ion-icon> 
+                        Eliminar Receta
+                    </button>
+                    ${recipe.video ? `<a href="${recipe.video}" target="_blank" class="cook-video-link"><ion-icon name="logo-youtube"></ion-icon> Ver en YouTube</a>` : ''}
+                </div>
+            </div>
+        </div>
     `;
+
+
+    document.getElementById('delete-recipe-permanent').onclick = () => {
+        if (confirm('¿Borrar definitivamente esta receta?')) {
+            recipes = recipes.filter(r => r.id !== id);
+            saveToLocalStorage();
+            viewModal.style.display = 'none';
+            renderRecipes();
+            showToast('Receta eliminada');
+        }
+    };
 
     // Update Favorite Button in Modal
     const favIcon = favoriteCurrentBtn.querySelector('ion-icon');
@@ -627,7 +665,7 @@ function toggleFavorite(id) {
         recipes[index].isFavorite = !recipes[index].isFavorite;
         saveToLocalStorage();
         renderRecipes();
-        if (currentView === 'home' && currentCategory === 'all' && !currentSearch) {
+        if (currentView === 'home' && currentTag === 'all' && !currentSearch) {
             renderRandomRecipes();
         }
     }
@@ -637,8 +675,6 @@ function toggleFavorite(id) {
 
 function switchView(view) {
     currentView = view;
-
-    // Hide all
     plannerView.style.display = 'none';
     shoppingView.style.display = 'none';
     recipeGridContainer.style.display = 'none';
@@ -655,27 +691,97 @@ function switchView(view) {
         renderShoppingList();
     }
 
-    // Update active state for all nav items (desktop + mobile)
-    navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-view') === view) {
-            // Only mark as active if it matches the current view
-            // Exception: home category items only if currentView is home
-            if (view === 'home') {
-                if (item.getAttribute('data-category') === currentCategory) {
-                    item.classList.add('active');
-                }
-            } else {
-                item.classList.add('active');
-            }
-        }
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === view);
     });
+}
 
-    // Update Category label in custom mobile dropdown
-    const currentCategoryLabel = document.getElementById('current-category-label');
-    if (currentCategoryLabel && view === 'home') {
-        const option = document.querySelector(`.dropdown-options li[data-category="${currentCategory}"]`);
-        if (option) currentCategoryLabel.textContent = option.textContent;
+function renderTagDropdowns() {
+    const desktopList = document.getElementById('tag-options-desktop');
+    const mobileList = document.getElementById('tag-options-mobile');
+    const desktopLabel = document.getElementById('current-tag-label-desktop');
+
+    const html = `<li data-tag="all">Todas las Tags</li>` + 
+        userTags.map(t => `<li data-tag="${t}">${t}</li>`).join('');
+    
+    if (desktopList) desktopList.innerHTML = html;
+    if (mobileList) mobileList.innerHTML = html;
+
+    const setupListeners = (list) => {
+        if (!list) return;
+        list.querySelectorAll('li').forEach(li => {
+            li.onclick = () => {
+                currentTag = li.dataset.tag;
+                if (desktopLabel) desktopLabel.textContent = li.textContent;
+                renderRecipes();
+                document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('active'));
+            };
+        });
+    };
+
+    setupListeners(desktopList);
+    setupListeners(mobileList);
+}
+
+function renderTagsManager() {
+    const container = document.getElementById('tags-list-container');
+    container.innerHTML = userTags.map((tag, i) => `
+        <div class="tag-manager-item">
+            <span class="tag-manager-item-name">${tag}</span>
+            <div class="tag-manager-actions">
+                <button class="btn-icon" onclick="editTag(${i})"><ion-icon name="create-outline"></ion-icon></button>
+                <button class="btn-icon" style="color: #ef4444;" onclick="deleteTag(${i})"><ion-icon name="trash-outline"></ion-icon></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.editTag = (i) => {
+    const newName = prompt('Nuevo nombre para la tag:', userTags[i]);
+    if (newName && newName.trim()) {
+        userTags[i] = newName.trim();
+        saveTags();
+        renderTagsManager();
+        renderTagDropdowns();
+    }
+};
+
+window.deleteTag = (i) => {
+    if (confirm(`¿Eliminar tag "${userTags[i]}"?`)) {
+        userTags.splice(i, 1);
+        saveTags();
+        renderTagsManager();
+        renderTagDropdowns();
+    }
+};
+
+function saveTags() {
+    if (auth.currentUser) {
+        db.ref(`users/${auth.currentUser.uid}/tags`).set(userTags);
+    }
+}
+
+function processImportedJson() {
+    try {
+        const data = JSON.parse(jsonInput.value);
+        const newRecipe = {
+            id: Date.now(),
+            name: data.title || 'Sin Título',
+            tags: data.tags || (data.category ? [data.category] : ['Otros']),
+            ingredients: Array.isArray(data.ingredients) ? data.ingredients.join('\n') : data.ingredients,
+            steps: Array.isArray(data.instructions) ? data.instructions.join('\n') : data.instructions,
+            video: data.video || '',
+            image: data.image || `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`,
+            isFavorite: false
+        };
+        recipes.push(newRecipe);
+        saveToLocalStorage();
+        renderRecipes();
+        importModal.style.display = 'none';
+        showToast('Importado con éxito');
+    } catch (e) {
+        importError.textContent = 'JSON no válido';
+        importError.style.display = 'block';
     }
 }
 
@@ -709,32 +815,42 @@ function renderWeeklyPlanner() {
 
 function openPlannerSelector(day) {
     activePlannerDay = day;
-    plannerDayName.textContent = day;
+    document.getElementById('planner-day-name').textContent = day;
+    document.getElementById('planner-search-input').value = '';
+    renderPlannerSelectorList();
+    document.getElementById('planner-modal').style.display = 'block';
+}
 
-    plannerOptions.innerHTML = '';
+function renderPlannerSelectorList(filter = '') {
+    const listContainer = document.getElementById('planner-options');
+    listContainer.innerHTML = '';
 
-    if (recipes.length === 0) {
-        plannerOptions.innerHTML = '<p class="no-recipes small">No tienes recetas guardadas aún.</p>';
-    } else {
-        recipes.forEach(r => {
-            const div = document.createElement('div');
-            div.className = 'planner-option-item';
-            div.innerHTML = `
-                <img src="${r.image}" alt="${r.name}">
-                <span>${r.name}</span>
-            `;
-            div.onclick = () => {
-                if (!plannerData[day]) plannerData[day] = [];
-                plannerData[day].push(r.id);
-                savePlannerData();
-                renderWeeklyPlanner();
-                plannerModal.style.display = 'none';
-            };
-            plannerOptions.appendChild(div);
-        });
+    const filtered = recipes.filter(r => 
+        r.name.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+        listContainer.innerHTML = '<p class="no-recipes small">No se encontraron recetas.</p>';
+        return;
     }
 
-    plannerModal.style.display = 'block';
+    filtered.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'planner-list-item';
+        item.innerHTML = `
+            <img src="${r.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=200'}" class="planner-list-thumbnail">
+            <span class="planner-list-name">${r.name}</span>
+            <ion-icon name="add-circle-outline" style="font-size: 1.5rem;"></ion-icon>
+        `;
+        item.onclick = () => {
+            if (!plannerData[activePlannerDay]) plannerData[activePlannerDay] = [];
+            plannerData[activePlannerDay].push(r.id);
+            savePlannerData();
+            renderWeeklyPlanner();
+            document.getElementById('planner-modal').style.display = 'none';
+        };
+        listContainer.appendChild(item);
+    });
 }
 
 function removeFromPlanner(day, id) {
@@ -777,19 +893,33 @@ function renderShoppingList() {
 }
 
 function openCookMode(recipe) {
-    document.getElementById('cook-title').textContent = recipe.name;
-    const ingredientsList = document.getElementById('cook-ingredients-list');
-    const stepsDiv = document.getElementById('cook-steps-list');
+    cookOverlay.innerHTML = `
+        <div class="cook-content">
+            <header class="cook-header">
+                <div class="cook-title-area">
+                    <h1>${recipe.name}</h1>
+                    <div id="cook-video-link-container">
+                        ${recipe.video ? `<a href="${recipe.video}" target="_blank" class="cook-video-link"><ion-icon name="logo-youtube"></ion-icon> Ver Video Tutorial</a>` : ''}
+                    </div>
+                </div>
+                <button class="btn-close-circle" onclick="document.getElementById('cook-overlay').style.display='none'"><ion-icon name="close-outline"></ion-icon></button>
+            </header>
 
-    // Split by newlines, commas or semicolons to separate ingredients correctly
-    ingredientsList.innerHTML = recipe.ingredients.split(/[\n,;]+/).filter(i => i.trim()).map(i => `
-        <li onclick="this.classList.toggle('checked')">${i.trim()}</li>
-    `).join('');
+            <div class="cook-ingredients">
+                <h2 class="cook-col-title">INGREDIENTES <span>(Toca para marcar)</span></h2>
+                <ul class="checklist">
+                    ${recipe.ingredients.split('\n').map(i => i.trim() ? `<li onclick="this.classList.toggle('checked')">${i.trim()}</li>` : '').join('')}
+                </ul>
+            </div>
 
-    stepsDiv.innerHTML = recipe.steps.split('\n').filter(s => s.trim()).map(s => `
-        <p>${s}</p>
-    `).join('');
-
+            <div class="cook-preparation">
+                <h2 class="cook-col-title">PREPARACIÓN</h2>
+                <div class="cook-steps">
+                    ${(recipe.steps || recipe.preparation || '').split('\n').map(p => p.trim() ? `<p>${p.trim()}</p>` : '').join('')}
+                </div>
+            </div>
+        </div>
+    `;
     cookOverlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
