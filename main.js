@@ -885,29 +885,31 @@ function savePlannerData() {
 
 function renderShoppingList() {
     shoppingContent.innerHTML = '';
-    const allIngredients = [];
+    const ingredientCounts = {};
 
     Object.values(plannerData).flat().forEach(id => {
         const r = recipes.find(rec => rec.id === id);
         if (r && r.ingredients) {
             r.ingredients.split('\n').forEach(i => {
-                if (i.trim()) allIngredients.push(i.trim());
+                if (i.trim()) {
+                    const item = i.trim().toLowerCase();
+                    ingredientCounts[item] = (ingredientCounts[item] || 0) + 1;
+                }
             });
         }
     });
 
-    if (allIngredients.length === 0) {
+    if (Object.keys(ingredientCounts).length === 0) {
         shoppingContent.innerHTML = '<p class="no-recipes">Añade recetas al planificador para ver tu lista de compras.</p>';
         return;
     }
 
-    // De-duplicate (simple)
-    const unique = [...new Set(allIngredients)];
-
-    unique.forEach(item => {
+    Object.entries(ingredientCounts).sort().forEach(([item, count]) => {
         const div = document.createElement('div');
         div.className = 'shopping-item';
-        div.innerHTML = `<span>${item}</span><ion-icon name="checkmark-circle-outline" color="primary"></ion-icon>`;
+        const displayItem = item.charAt(0).toUpperCase() + item.slice(1);
+        const countLabel = count > 1 ? `<span class="item-count">x${count}</span>` : '';
+        div.innerHTML = `<span>${displayItem}${countLabel}</span><ion-icon name="checkmark-circle-outline" color="primary"></ion-icon>`;
         shoppingContent.appendChild(div);
     });
 }

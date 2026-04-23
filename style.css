@@ -1094,6 +1094,16 @@ button {
     font-size: 1.1rem;
 }
 
+.item-count {
+    background: var(--primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+}
+
 .shopping-item:last-child {
     border-bottom: none;
 }
