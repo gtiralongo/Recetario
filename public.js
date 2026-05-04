@@ -27,13 +27,13 @@ async function checkUserAuth() {
             const navBtn = document.querySelector('.landing-nav .btn-primary');
             const heroBtn = document.querySelector('.hero-content .btn-primary');
             if (navBtn) {
-                navBtn.innerHTML = '<ion-icon name="restaurant-outline"></ion-icon><span>Ir a mi recetario</span>';
-                navBtn.href = 'app.html';
-            }
-            if (heroBtn) {
-                heroBtn.innerHTML = '<ion-icon name="restaurant-outline"></ion-icon><span>Ir a mi recetario</span>';
-                heroBtn.href = 'app.html';
-            }
+                 navBtn.innerHTML = '<span class="material-icons">restaurant</span><span>Ir a mi recetario</span>';
+                 navBtn.href = 'app.html';
+             }
+             if (heroBtn) {
+                 heroBtn.innerHTML = '<span class="material-icons">restaurant</span><span>Ir a mi recetario</span>';
+                 heroBtn.href = 'app.html';
+             }
 
             // Re-render with auth state
             renderPublicRecipes();
@@ -112,16 +112,16 @@ async function loadDemoRecipes() {
 }
 
 function showPublicEmpty(message) {
-    publicGrid.innerHTML = `
-        <div class="no-recipes">
-            <ion-icon name="restaurant-outline"></ion-icon>
-            <p>${message}</p>
-            <a href="app.html" class="btn-primary" style="margin-top: 1rem;">
-                <ion-icon name="add"></ion-icon>
-                <span>Crear mi primera receta</span>
-            </a>
-        </div>
-    `;
+         publicGrid.innerHTML = `
+         <div class="no-recipes">
+             <span class="material-icons">restaurant</span>
+             <p>${message}</p>
+             <a href="app.html" class="btn-primary" style="margin-top: 1rem;">
+                 <span class="material-icons">add</span>
+                 <span>Crear mi primera receta</span>
+             </a>
+         </div>
+     `;
 }
 
 // --- Rendering ---
@@ -137,12 +137,12 @@ function renderPublicRecipes() {
 
     publicGrid.innerHTML = '';
     if (filtered.length === 0) {
-        publicGrid.innerHTML = `
-            <div class="no-recipes">
-                <ion-icon name="sad-outline"></ion-icon>
-                <p>No se encontraron recetas</p>
-            </div>
-        `;
+         publicGrid.innerHTML = `
+             <div class="no-recipes">
+                 <span class="material-icons">sentiment_dissatisfied</span>
+                 <p>No se encontraron recetas</p>
+             </div>
+         `;
         return;
     }
 
@@ -155,34 +155,34 @@ function renderPublicRecipes() {
         let buttonHtml = '';
         if (isUserLoggedIn) {
             if (alreadyOwned) {
-                buttonHtml = `<button class="btn-add-recipe owned" disabled>
-                    <ion-icon name="checkmark-circle"></ion-icon>
-                    <span>Ya en tu recetario</span>
-                </button>`;
+                 buttonHtml = `<button class="btn-add-recipe owned" disabled>
+                     <span class="material-icons">check_circle</span>
+                     <span>Ya en tu recetario</span>
+                 </button>`;
             } else {
-                buttonHtml = `<button class="btn-add-recipe" onclick="event.stopPropagation(); addToMyRecipes(${recipe.id})">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>A mi recetario</span>
-                </button>`;
+                 buttonHtml = `<button class="btn-add-recipe" onclick="event.stopPropagation(); addToMyRecipes(${recipe.id})">
+                     <span class="material-icons">add_circle_outline</span>
+                     <span>A mi recetario</span>
+                 </button>`;
             }
         }
 
         card.innerHTML = `
             <div class="recipe-card-img-container">
                 <img src="${recipe.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?auto=format&fit=crop&q=80&w=800'}" class="recipe-img" alt="${recipe.name}">
-                <div class="author-badge">
-                    <ion-icon name="person-outline"></ion-icon>
-                    <span>${recipe.authorName || 'Anónimo'}</span>
-                </div>
-                ${recipe.video ? '<div class="video-badge"><ion-icon name="play"></ion-icon></div>' : ''}
+                 <div class="author-badge">
+                     <span class="material-icons">person_outline</span>
+                     <span>${recipe.authorName || 'Anónimo'}</span>
+                 </div>
+                 ${recipe.video ? '<div class="video-badge"><span class="material-icons">play_arrow</span></div>' : ''}
             </div>
             <div class="recipe-info">
                 <div class="recipe-tags">${displayTags}</div>
                 <h3>${recipe.name}</h3>
-                <div class="recipe-meta">
-                    <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '--'} min</span>
-                    <span><ion-icon name="bar-chart-outline"></ion-icon> ${recipe.difficulty || 'Media'}</span>
-                </div>
+                 <div class="recipe-meta">
+                     <span><span class="material-icons">schedule</span> ${recipe.time || '--'} min</span>
+                     <span><span class="material-icons">bar_chart</span> ${recipe.difficulty || 'Media'}</span>
+                 </div>
                 ${buttonHtml}
             </div>
         `;
@@ -203,20 +203,20 @@ function viewPublicRecipe(id) {
     let actionHtml = '';
     if (isUserLoggedIn) {
         if (alreadyOwned) {
-            actionHtml = `<span class="detail-owned-badge">
-                <ion-icon name="checkmark-circle"></ion-icon> Ya en tu recetario
-            </span>`;
+             actionHtml = `<span class="detail-owned-badge">
+                 <span class="material-icons">check_circle</span> Ya en tu recetario
+             </span>`;
         } else {
-            actionHtml = `<button class="btn-add-to-recipes" id="detail-add-btn">
-                <ion-icon name="add-circle"></ion-icon>
-                <span>Agregar a mi recetario</span>
-            </button>`;
+             actionHtml = `<button class="btn-add-to-recipes" id="detail-add-btn">
+                 <span class="material-icons">add_circle</span>
+                 <span>Agregar a mi recetario</span>
+             </button>`;
         }
     } else {
-        actionHtml = `<a href="app.html" class="btn-add-to-recipes">
-            <ion-icon name="log-in"></ion-icon>
-            <span>Inicia sesión para guardarla</span>
-        </a>`;
+             actionHtml = `<a href="app.html" class="btn-add-to-recipes">
+             <span class="material-icons">login</span>
+             <span>Inicia sesión para guardarla</span>
+         </a>`;
     }
 
     publicDetails.innerHTML = `
@@ -229,15 +229,15 @@ function viewPublicRecipe(id) {
             <div class="detail-content">
                 <div class="detail-header-info">
                     <div class="recipe-tags" style="margin-bottom: 1rem;">${tagsHtml}</div>
-                    <div class="author-info">
-                        <ion-icon name="person"></ion-icon>
-                        <span>${recipe.authorName || 'Anónimo'}</span>
-                    </div>
+                     <div class="author-info">
+                         <span class="material-icons">person</span>
+                         <span>${recipe.authorName || 'Anónimo'}</span>
+                     </div>
                     <h1>${recipe.name}</h1>
-                    <div class="detail-meta-row">
-                        <span><ion-icon name="time-outline"></ion-icon> ${recipe.time || '--'} min</span>
-                        <span><ion-icon name="bar-chart-outline"></ion-icon> ${recipe.difficulty || 'Media'}</span>
-                    </div>
+                     <div class="detail-meta-row">
+                         <span><span class="material-icons">schedule</span> ${recipe.time || '--'} min</span>
+                         <span><span class="material-icons">bar_chart</span> ${recipe.difficulty || 'Media'}</span>
+                     </div>
                 </div>
 
                 <div class="detail-section">
@@ -262,7 +262,7 @@ function viewPublicRecipe(id) {
                 <div class="detail-footer">
                     ${actionHtml}
                     <button id="public-share-btn" class="btn-icon circle">
-                        <ion-icon name="share-social-outline"></ion-icon>
+                        <span class="material-icons">share</span>
                     </button>
                 </div>
             </div>

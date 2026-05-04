@@ -2099,7 +2099,789 @@ input:checked + .slider {
         top: 65px;
     }
 
-    .landing-nav {
-        padding: 1rem;
+     .landing-nav {
+         padding: 1rem;
+     }
+ }
+
+/* ============================================
+   MATERIAL DESIGN 3 - LANDING PAGE ONLY
+   Namespace: .m3-landing
+   ============================================ */
+
+.m3-landing {
+    /* --- M3 Color System (Tonal Palette based on #ff4757) --- */
+    --m3-primary: #ff4757;
+    --m3-primary-rgb: 255, 71, 87;
+    --m3-on-primary: #ffffff;
+    --m3-primary-container: #ffdade;
+    --m3-on-primary-container: #410006;
+
+    --m3-secondary: #725f63;
+    --m3-on-secondary: #ffffff;
+    --m3-secondary-container: #ffd8dc;
+    --m3-on-secondary-container: #2b1519;
+
+    --m3-surface: #1a1a1a;
+    --m3-surface-rgb: 26, 26, 26;
+    --m3-on-surface: #e5e5e5;
+    --m3-surface-variant: #534343;
+    --m3-on-surface-variant: #d9c0c3;
+    --m3-surface-container-lowest: #141414;
+    --m3-surface-container-low: #1e1e1e;
+    --m3-surface-container: #222222;
+    --m3-surface-container-high: #2a2a2a;
+    --m3-surface-container-highest: #353535;
+
+    --m3-outline: #9d8386;
+    --m3-outline-variant: #534343;
+
+    --m3-error: #ffb4ab;
+    --m3-on-error: #690005;
+
+    /* --- M3 Typography (Roboto) --- */
+    --m3-font-family: 'Roboto', sans-serif;
+
+    --m3-display-large: 400 57px/64px var(--m3-font-family);
+    --m3-display-medium: 400 45px/52px var(--m3-font-family);
+    --m3-display-small: 400 36px/44px var(--m3-font-family);
+
+    --m3-headline-large: 400 32px/40px var(--m3-font-family);
+    --m3-headline-medium: 400 28px/36px var(--m3-font-family);
+    --m3-headline-small: 400 24px/32px var(--m3-font-family);
+
+    --m3-title-large: 400 22px/28px var(--m3-font-family);
+    --m3-title-medium: 500 16px/24px var(--m3-font-family);
+    --m3-title-small: 500 14px/20px var(--m3-font-family);
+
+    --m3-body-large: 400 16px/24px var(--m3-font-family);
+    --m3-body-medium: 400 14px/20px var(--m3-font-family);
+    --m3-body-small: 400 12px/16px var(--m3-font-family);
+
+    --m3-label-large: 500 14px/20px var(--m3-font-family);
+    --m3-label-medium: 500 12px/16px var(--m3-font-family);
+    --m3-label-small: 500 11px/16px var(--m3-font-family);
+
+    /* --- M3 Motion --- */
+    --m3-motion-standard: cubic-bezier(0.2, 0, 0, 1);
+    --m3-motion-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+    --m3-motion-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --m3-motion-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --m3-motion-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --m3-motion-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+    --m3-duration-short: 200ms;
+    --m3-duration-medium: 400ms;
+    --m3-duration-long: 700ms;
+
+    /* --- M3 Elevation (Dark Theme) --- */
+    --m3-elevation-0: none;
+    --m3-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    --m3-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+    --m3-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15);
+    --m3-elevation-4: 0 6px 10px 4px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.15);
+    --m3-elevation-5: 0 8px 12px 6px rgba(0,0,0,0.3), 0 3px 5px rgba(0,0,0,0.15);
+
+    /* --- M3 Shape --- */
+    --m3-shape-none: 0px;
+    --m3-shape-extra-small: 4px;
+    --m3-shape-small: 8px;
+    --m3-shape-medium: 12px;
+    --m3-shape-large: 16px;
+    --m3-shape-extra-large: 28px;
+    --m3-shape-full: 9999px;
+}
+
+/* --- M3 Base Typography Override for Landing --- */
+.m3-landing .landing-hero,
+.m3-landing .public-recipes-section,
+.m3-landing .landing-footer {
+    font-family: var(--m3-font-family);
+}
+
+/* --- M3 Hero Section --- */
+.m3-landing .landing-hero {
+    min-height: 35vh;
+    background: var(--m3-surface);
+    background-image: radial-gradient(ellipse at 80% 20%, rgba(var(--m3-primary-rgb), 0.15) 0%, transparent 60%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.m3-landing .landing-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: rgba(var(--m3-surface-rgb), 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--m3-surface-container-highest);
+}
+
+.m3-landing .landing-nav .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--m3-on-surface);
+    text-decoration: none;
+    letter-spacing: 0;
+}
+
+.m3-landing .landing-nav .logo .material-icons {
+    color: var(--m3-primary);
+    font-size: 1.8rem;
+}
+
+.m3-landing .hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 2rem 4rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.m3-landing .hero-content h1 {
+    font: var(--m3-display-small);
+    font-size: 3.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--m3-on-surface);
+    letter-spacing: 0;
+}
+
+.m3-landing .hero-content p {
+    font: var(--m3-body-large);
+    font-size: 1.25rem;
+    color: var(--m3-on-surface-variant);
+    margin-bottom: 2.5rem;
+}
+
+/* --- M3 Button (Filled) --- */
+.m3-landing .btn-primary,
+.m3-landing .btn-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    height: 40px;
+    background: var(--m3-primary);
+    color: var(--m3-on-primary);
+    border: none;
+    border-radius: var(--m3-shape-full);
+    font: var(--m3-label-large);
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    transition: box-shadow var(--m3-duration-short) var(--m3-motion-standard),
+                background var(--m3-duration-short) var(--m3-motion-standard);
+    box-shadow: var(--m3-elevation-0);
+    text-decoration: none;
+}
+
+.m3-landing .btn-primary:hover,
+.m3-landing .btn-lg:hover {
+    box-shadow: var(--m3-elevation-1);
+    background: color-mix(in srgb, var(--m3-primary) 92%, white);
+}
+
+.m3-landing .btn-primary:active,
+.m3-landing .btn-lg:active {
+    box-shadow: var(--m3-elevation-0);
+    background: color-mix(in srgb, var(--m3-primary) 80%, black);
+}
+
+.m3-landing .btn-lg {
+    height: 48px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    gap: 0.5rem;
+}
+
+.m3-landing .btn-lg .material-icons {
+    font-size: 1.125rem;
+}
+
+/* --- M3 Section Header --- */
+.m3-landing .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+}
+
+.m3-landing .section-header h2 {
+    font: var(--m3-headline-medium);
+    font-size: 2.25rem;
+    color: var(--m3-on-surface);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0;
+}
+
+.m3-landing .section-header p {
+    font: var(--m3-body-large);
+    color: var(--m3-on-surface-variant);
+}
+
+/* --- M3 Search Bar (Outlined TextField) --- */
+.m3-landing .public-search-bar {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: var(--m3-shape-extra-large);
+    background: var(--m3-surface-container);
+    border: 1px solid var(--m3-outline-variant);
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 70px;
+    z-index: 50;
+    transition: border-color var(--m3-duration-short) var(--m3-motion-standard);
+}
+
+.m3-landing .public-search-bar:focus-within {
+    border-color: var(--m3-primary);
+    border-width: 2px;
+    padding: calc(0.75rem - 1px);
+}
+
+.m3-landing .public-search-bar .search-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: transparent;
+    padding: 0.5rem 0.75rem;
+    border: none;
+}
+
+.m3-landing .public-search-bar .search-container .material-icons {
+    color: var(--m3-on-surface-variant);
+    font-size: 1.5rem;
+}
+
+.m3-landing .public-search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--m3-on-surface);
+    font: var(--m3-body-large);
+    outline: none;
+}
+
+.m3-landing .public-search-bar input::placeholder {
+    color: var(--m3-on-surface-variant);
+}
+
+/* --- M3 Card (Elevated) --- */
+.m3-landing .recipe-card {
+    background: var(--m3-surface-container-low);
+    border-radius: var(--m3-shape-medium);
+    overflow: hidden;
+    border: none;
+    transition: box-shadow var(--m3-duration-medium) var(--m3-motion-emphasized),
+                transform var(--m3-duration-medium) var(--m3-motion-emphasized);
+    box-shadow: var(--m3-elevation-1);
+    cursor: pointer;
+}
+
+.m3-landing .recipe-card:hover {
+    box-shadow: var(--m3-elevation-2);
+    transform: translateY(-4px);
+}
+
+.m3-landing .recipe-card-img-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.m3-landing .recipe-card-img-container .recipe-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--m3-duration-medium) var(--m3-motion-standard);
+}
+
+.m3-landing .recipe-card:hover .recipe-img {
+    transform: scale(1.05);
+}
+
+.m3-landing .recipe-info {
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.m3-landing .recipe-tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.m3-landing .tag {
+    background: var(--m3-secondary-container);
+    color: var(--m3-on-secondary-container);
+    font: var(--m3-label-small);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--m3-shape-full);
+    letter-spacing: 0.5px;
+    text-transform: none;
+}
+
+.m3-landing .recipe-card h3 {
+    font: var(--m3-title-medium);
+    color: var(--m3-on-surface);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.m3-landing .recipe-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--m3-on-surface-variant);
+    font: var(--m3-body-small);
+}
+
+.m3-landing .recipe-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.m3-landing .recipe-meta .material-icons {
+    font-size: 1.125rem;
+}
+
+/* --- M3 Badges --- */
+.m3-landing .author-badge {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--m3-shape-full);
+    font: var(--m3-label-small);
+    color: white;
+}
+
+.m3-landing .author-badge .material-icons {
+    font-size: 0.875rem;
+}
+
+.m3-landing .video-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: rgba(255, 71, 87, 0.9);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--m3-elevation-1);
+}
+
+.m3-landing .video-badge .material-icons {
+    font-size: 1.125rem;
+}
+
+/* --- M3 Add Button (Tonal) --- */
+.m3-landing .btn-add-recipe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    padding: 0.625rem;
+    margin-top: 0.75rem;
+    background: var(--m3-secondary-container);
+    color: var(--m3-on-secondary-container);
+    border: none;
+    border-radius: var(--m3-shape-full);
+    font: var(--m3-label-large);
+    cursor: pointer;
+    transition: box-shadow var(--m3-duration-short) var(--m3-motion-standard);
+}
+
+.m3-landing .btn-add-recipe:hover {
+    box-shadow: var(--m3-elevation-1);
+    background: color-mix(in srgb, var(--m3-secondary-container) 92%, black);
+}
+
+.m3-landing .btn-add-recipe.owned {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--accent-green);
+    cursor: default;
+}
+
+.m3-landing .btn-add-recipe .material-icons {
+    font-size: 1.125rem;
+}
+
+/* --- M3 No Recipes State --- */
+.m3-landing .no-recipes {
+    grid-column: 1 / -1;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--m3-on-surface-variant);
+}
+
+.m3-landing .no-recipes .material-icons {
+    font-size: 4rem;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.m3-landing .no-recipes p {
+    font: var(--m3-body-large);
+}
+
+/* --- M3 Modal --- */
+.m3-landing .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2000;
+}
+
+.m3-landing .modal-content {
+    background: var(--m3-surface-container);
+    margin: 2rem auto;
+    width: 90%;
+    max-width: 900px;
+    border-radius: var(--m3-shape-extra-large);
+    border: none;
+    box-shadow: var(--m3-elevation-4);
+    overflow-y: auto;
+    max-height: calc(100vh - 4rem);
+    animation: m3ModalSlideUp var(--m3-duration-medium) var(--m3-motion-emphasized);
+}
+
+@keyframes m3ModalSlideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.m3-landing .modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--m3-surface-container-highest);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.m3-landing .header-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1rem;
+}
+
+.m3-landing .header-main-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* --- M3 Icon Buttons --- */
+.m3-landing .btn-close-circle,
+.m3-landing .btn-icon.circle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--m3-on-surface-variant);
+    border: none;
+    cursor: pointer;
+    transition: background var(--m3-duration-short) var(--m3-motion-standard);
+}
+
+.m3-landing .btn-close-circle:hover,
+.m3-landing .btn-icon.circle:hover {
+    background: rgba(var(--m3-on-surface-rgb), 0.08);
+    color: var(--m3-on-surface);
+    transform: none;
+}
+
+.m3-landing .btn-close-circle .material-icons,
+.m3-landing .btn-icon.circle .material-icons {
+    font-size: 1.5rem;
+}
+
+/* --- M3 Detail View --- */
+.m3-landing .detail-view {
+    max-width: 1000px;
+    padding: 0;
+}
+
+.m3-landing .detail-hero {
+    position: relative;
+    height: 360px;
+    border-radius: var(--m3-shape-extra-large) var(--m3-shape-extra-large) 0 0;
+    overflow: hidden;
+}
+
+.m3-landing .detail-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.m3-landing .detail-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--m3-surface-container) 0%, transparent 70%);
+}
+
+.m3-landing .detail-content {
+    padding: 1.5rem 2.5rem 3rem;
+    margin-top: -60px;
+    position: relative;
+    z-index: 5;
+}
+
+.m3-landing .detail-header-info h1 {
+    font: var(--m3-headline-medium);
+    font-size: 2.5rem;
+    color: var(--m3-on-surface);
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.m3-landing .author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--m3-on-surface-variant);
+    font: var(--m3-body-medium);
+    margin-bottom: 0.5rem;
+}
+
+.m3-landing .author-info .material-icons {
+    font-size: 1.125rem;
+}
+
+.m3-landing .detail-meta-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--m3-on-surface-variant);
+    font: var(--m3-body-medium);
+}
+
+.m3-landing .detail-meta-row .material-icons {
+    font-size: 1.125rem;
+}
+
+.m3-landing .detail-section-title {
+    font: var(--m3-title-small);
+    color: var(--m3-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 2rem 0 1rem;
+}
+
+.m3-landing .detail-ingredients {
+    font: var(--m3-body-large);
+    color: var(--m3-on-surface);
+    line-height: 1.8;
+}
+
+.m3-landing .detail-steps {
+    font: var(--m3-body-large);
+    color: var(--m3-on-surface);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--m3-surface-container-highest);
+}
+
+.m3-landing .detail-footer {
+    padding: 1.5rem 2.5rem;
+    border-top: 1px solid var(--m3-surface-container-highest);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+}
+
+.m3-landing .btn-add-to-recipes {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: var(--m3-primary);
+    color: var(--m3-on-primary);
+    border: none;
+    border-radius: var(--m3-shape-full);
+    font: var(--m3-label-large);
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow var(--m3-duration-short) var(--m3-motion-standard);
+}
+
+.m3-landing .btn-add-to-recipes:hover {
+    box-shadow: var(--m3-elevation-1);
+}
+
+.m3-landing .detail-owned-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-green);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--m3-shape-full);
+    font: var(--m3-label-large);
+}
+
+.m3-landing .detail-owned-badge .material-icons {
+    font-size: 1.125rem;
+}
+
+/* --- M3 Footer --- */
+.m3-landing .landing-footer {
+    padding: 2rem;
+    text-align: center;
+    color: var(--m3-on-surface-variant);
+    font: var(--m3-body-medium);
+
+    border-top: 1px solid var(--m3-surface-container-highest);
+    background: var(--m3-surface-container-low);
+}
+
+/* --- M3 Material Icons Base --- */
+.m3-landing .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
+}
+
+/* --- M3 Scrollbar --- */
+.m3-landing ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.m3-landing ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.m3-landing ::-webkit-scrollbar-thumb {
+    background: var(--m3-surface-container-highest);
+    border-radius: 10px;
+}
+
+/* --- M3 Animations --- */
+.m3-landing .view-section {
+    animation: m3FadeIn var(--m3-duration-medium) var(--m3-motion-emphasized);
+}
+
+@keyframes m3FadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- M3 Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .m3-landing .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .m3-landing .hero-content p {
+        font-size: 1rem;
+    }
+
+    .m3-landing .landing-hero {
+        min-height: 40vh;
+    }
+
+    .m3-landing .public-search-bar {
+        top: 65px;
+    }
+
+    .m3-landing .section-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .m3-landing .detail-hero {
+        height: 250px;
+        border-radius: 0;
+    }
+
+    .m3-landing .detail-content {
+        padding: 1rem 1.5rem 2rem;
+    }
+
+    .m3-landing .detail-header-info h1 {
+        font-size: 2rem;
+    }
+
+    .m3-landing .modal-content {
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .m3-landing .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .m3-landing .recipe-grid {
+        grid-template-columns: 1fr;
     }
 }

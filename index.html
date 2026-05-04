@@ -9,10 +9,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- Ionicons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
@@ -22,13 +20,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 
-<body class="dark-theme">
+<body class="dark-theme m3-landing">
     <!-- Hero Section -->
     <header class="landing-hero">
         <nav class="landing-nav glass">
             <a href="index.html" class="logo">
-                <ion-icon name="restaurant"></ion-icon>
-                <span>Gusto</span>
+                <span class="material-icons">restaurant</span>
+                 <span>Gusto</span>
             </a>
             <a href="app.html" class="btn-primary">Entrar a mi recetario</a>
         </nav>
@@ -36,8 +34,8 @@
             <h1>Tu cocina, tus reglas</h1>
             <p>Guarda, organiza y comparte tus recetas favoritas.</p>
             <a href="app.html" class="btn-primary btn-lg">
-                <ion-icon name="restaurant-outline"></ion-icon>
-                <span>Empezar ahora</span>
+                <span class="material-icons">restaurant</span>
+                 <span>Empezar ahora</span>
             </a>
         </div>
     </header>
@@ -52,17 +50,17 @@
         <!-- Search -->
         <div class="public-search-bar glass">
             <div class="search-container">
-                <ion-icon name="search-outline"></ion-icon>
+                 <span class="material-icons">search</span>
                 <input type="text" id="public-search" placeholder="Buscar por nombre, ingrediente o tag...">
             </div>
         </div>
 
         <!-- Public Recipes Grid -->
         <div class="recipe-grid" id="public-recipe-grid">
-            <div class="no-recipes">
-                <ion-icon name="sad-outline"></ion-icon>
-                <p>Cargando recetas...</p>
-            </div>
+             <div class="no-recipes">
+                 <span class="material-icons">sentiment_dissatisfied</span>
+                 <p>Cargando recetas...</p>
+             </div>
         </div>
     </section>
 
@@ -76,17 +74,17 @@
         <div class="modal-content glass detail-view">
             <div class="modal-header">
                 <div class="header-actions-row">
-                    <button type="button" class="close-modal btn-close-circle">
-                        <ion-icon name="arrow-back-outline"></ion-icon>
-                    </button>
+                     <button type="button" class="close-modal btn-close-circle">
+                         <span class="material-icons">arrow_back</span>
+                     </button>
                     <div class="header-main-actions">
-                        <button id="public-share-btn" class="btn-icon circle">
-                            <ion-icon name="share-social-outline"></ion-icon>
-                        </button>
+                         <button id="public-share-btn" class="btn-icon circle">
+                             <span class="material-icons">share</span>
+                         </button>
                     </div>
-                    <button type="button" class="close-modal btn-close-circle">
-                        <ion-icon name="close-outline"></ion-icon>
-                    </button>
+                     <button type="button" class="close-modal btn-close-circle">
+                         <span class="material-icons">close</span>
+                     </button>
                 </div>
             </div>
             <div id="public-recipe-details" class="details-body">
