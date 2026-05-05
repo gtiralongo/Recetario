@@ -495,23 +495,20 @@ function setupEventListeners() {
         if (r) shareRecipe(r);
     });
 
-    document.querySelectorAll('.import-json-btn-menu').forEach(btn => {
-        btn.onclick = () => {
-            jsonInput.value = '';
-            importModal.style.display = 'block';
-        };
-    });
-
-    document.querySelectorAll('.export-json-btn-menu').forEach(btn => {
-        btn.onclick = exportRecipes;
-    });
-
-    processJsonBtn.onclick = processImportedJson;
-
     if (auth) {
+        const loginScreen = document.getElementById('login-screen');
+        const appDiv = document.getElementById('app');
+        const loadingAuth = document.getElementById('loading-auth');
+        const loginForm = document.getElementById('login-form');
+        const authCard = document.getElementById('auth-card');
+
+        // Show loading initially
+        loadingAuth.style.display = 'block';
+        loginForm.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        appDiv.style.display = 'none';
+
         auth.onAuthStateChanged(user => {
-            const loginScreen = document.getElementById('login-screen');
-            const appDiv = document.getElementById('app');
             if (user) {
                 isLoggedIn = true;
                 loginScreen.style.display = 'none';
@@ -521,6 +518,8 @@ function setupEventListeners() {
                 loadData();
             } else {
                 isLoggedIn = false;
+                loadingAuth.style.display = 'none';
+                loginForm.style.display = 'block';
                 loginScreen.style.display = 'flex';
                 appDiv.style.display = 'none';
             }

@@ -24,19 +24,25 @@
 <body class="dark-theme m3-app">
     <!-- Login Screen Overlay -->
     <div id="login-screen" class="auth-overlay">
-        <div class="auth-card glass">
+        <div class="auth-card glass" id="auth-card">
             <div class="auth-logo">
                 <span class="material-icons">restaurant</span>
                  <span>Gusto</span>
             </div>
-            <h1>Bienvenido a tu Recetario</h1>
-            <p>Guarda y organiza tus platos favoritos de forma privada y segura en la nube.</p>
-                <button id="main-login-btn" class="btn-primary">
-                 <span class="material-icons">login</span>
-                 <span>Entrar con Google</span>
-             </button>
-            <div class="auth-footer">
-                Tus recetas se sincronizan automáticamente en todos tus dispositivos.
+            <div id="loading-auth" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 1rem; color: var(--m3-on-surface-variant);">Verificando sesión...</p>
+            </div>
+            <div id="login-form">
+                <h1>Bienvenido a tu Recetario</h1>
+                <p>Guarda y organiza tus platos favoritos de forma privada y segura en la nube.</p>
+                    <button id="main-login-btn" class="google-login-btn">
+                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px; height: 20px; margin-right: 8px;">
+                     <span>Entrar con Google</span>
+                  </button>
+                <div class="auth-footer">
+                    Tus recetas se sincronizan automáticamente en todos tus dispositivos.
+                </div>
             </div>
         </div>
     </div>
@@ -148,10 +154,6 @@
                         <div class="dropdown-header">Mi Cuenta</div>
                         <button class="manage-tags-btn"><span class="material-icons">sell</span> Gestionar
                              Tags</button>
-                        <button class="import-json-btn-menu"><span class="material-icons">code</span> Importar
-                             JSON</button>
-                        <button class="export-json-btn-menu"><span class="material-icons">download</span> Exportar
-                             JSON</button>
                         <div class="dropdown-divider"></div>
                         <button class="logout-btn"><span class="material-icons">logout</span> Cerrar Sesión</button>
                     </div>
