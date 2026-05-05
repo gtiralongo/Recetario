@@ -3531,8 +3531,15 @@ input:checked + .slider {
     letter-spacing: 0.5px;
 }
 
-.m3-app .recipe-card h3 {
-    font-size: 1.25rem;
+.m3-app .recipe-info .recipe-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--m3-on-surface-variant);
+    font-size: 1rem;
+}
+
+.m3-app .recipe-info h3 {
+    font-size: 1.4rem;
     font-weight: 500;
     color: var(--m3-on-surface);
     margin-bottom: 0.5rem;
@@ -4025,7 +4032,7 @@ input:checked + .slider {
 }
 
 .m3-app .detail-ingredients {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--m3-on-surface);
     line-height: 1.8;
 }
@@ -4045,7 +4052,7 @@ input:checked + .slider {
 }
 
 .m3-app .detail-steps {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--m3-on-surface);
     line-height: 1.8;
     white-space: pre-wrap;

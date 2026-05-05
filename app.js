@@ -42,22 +42,10 @@ const shareRecipeBtn = document.getElementById('share-recipe-btn');
 const editCurrentBtn = document.getElementById('edit-current-btn');
 const favoriteCurrentBtn = document.getElementById('favorite-current-btn');
 
-// Modals
-const recipeModal = document.getElementById('recipe-modal');
-const viewModal = document.getElementById('view-modal');
-const recipeForm = document.getElementById('recipe-form');
-const closeBtns = document.querySelectorAll('.close-modal');
-const importModal = document.getElementById('import-modal');
-const processJsonBtn = document.getElementById('process-json-btn');
-const jsonInput = document.getElementById('json-input');
-const importError = document.getElementById('import-error');
-
 // Tag Dropdowns
 const tagContainers = [document.getElementById('tag-dropdown-desktop'), document.getElementById('tag-dropdown-mobile')];
 const tagOptionsLists = [document.getElementById('tag-options-desktop'), document.getElementById('tag-options-mobile')];
 const tagLabels = [document.getElementById('current-tag-label-desktop')];
-
-// --- Tags Dropdown Management ---
 function initTagsDropdown() {
     renderTagDropdowns();
 }
@@ -1057,19 +1045,6 @@ function openCookMode(recipe) {
     `;
     cookOverlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
-}
-
-function exportRecipes() {
-    const dataStr = JSON.stringify(recipes, null, 4);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = 'recipes.json';
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    showToast('Exportando recetario...');
 }
 
 // Kickstart
