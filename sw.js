@@ -2,10 +2,13 @@ const CACHE_NAME = 'gusto-v1';
 const ASSETS = [
     './',
     './index.html',
+    './app.html',
+    './app.js',
+    './public.js',
     './style.css',
     './main.js',
     './manifest.json',
-    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap'
+    'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'
 ];
 
 self.addEventListener('install', event => {
