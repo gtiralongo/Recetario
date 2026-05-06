@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Comunidad Gusto - Explora recetas de otros</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+    <style>
+        .community-header {
+            padding: 4rem 1.5rem 2rem;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(255, 71, 87, 0.05) 0%, transparent 100%);
+        }
+
+        .community-search-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 4rem 0;
+        }
+
+        .page-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .ads-sidebar {
+            display: none;
+            /* Reservado para desktop si quieres poner banners laterales */
+        }
+
+        @media (min-width: 1200px) {
+            .community-layout {
+                display: grid;
+                grid-template-columns: 1fr 300px;
+                gap: 2rem;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 2rem;
+            }
+
+            .ads-sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <nav class="landing-nav glass">
+        <a href="index.html" class="logo">
+            <span class="material-icons">restaurant</span>
+            <span>Gusto</span>
+        </a>
+        <div class="nav-actions">
+            <a href="app.html" class="btn-primary">Entrar</a>
+        </div>
+    </nav>
+
+    <header class="community-header">
+        <span class="badge">Comunidad</span>
+        <h1>Explora nuevas <span class="text-gradient">experiencias</span></h1>
+        <p class="hero-subtitle">Recetas compartidas por otros cocineros.</p>
+
+        <div class="community-search-container">
+            <div class="search-wrapper glass">
+                <span class="material-icons">search</span>
+                <input type="text" id="public-search" placeholder="Buscar por nombre, ingrediente o chef...">
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Ad Banner -->
+    <div id="adsense-top" class="ads-container">
+        <span>Publicidad (Banner Horizontal)</span>
+    </div>
+
+    <main class="community-layout">
+        <div class="community-main-content">
+            <!-- Grid de Recetas -->
+            <div class="recipe-grid" id="public-recipe-grid">
+                <!-- Se cargarÃ¡ dinÃ¡micamente -->
+            </div>
+
+            <!-- PaginaciÃ³n -->
+            <div class="pagination-container">
+                <button class="page-btn" id="prev-page" disabled>
+                    <span class="material-icons">chevron_left</span>
+                </button>
+                <span class="page-info" id="page-info">PÃ¡gina 1 de 1</span>
+                <button class="page-btn" id="next-page" disabled>
+                    <span class="material-icons">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        <aside class="ads-sidebar">
+            <div class="ads-container" style="height: 600px; position: sticky; top: 100px;">
+                <span>Publicidad Lateral (SkyScraper)</span>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-links" style="justify-content: center; margin-bottom: 2rem;">
+                <a href="privacy.html">Privacidad</a>
+                <a href="terms.html">Términos</a>
+                <a href="mailto:hola@gustoapp.com">Contacto</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gusto. Comunidad de Cocina.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- View Recipe Modal (Mismo que index) -->
+    <div id="public-view-modal" class="modal">
+        <div class="modal-content glass detail-view">
+            <div class="modal-header">
+                <div class="header-actions-row">
+                    <button type="button" class="close-modal btn-close-circle">
+                        <span class="material-icons">arrow_back</span>
+                    </button>
+                    <div class="header-main-actions">
+                        <button id="public-share-btn" class="btn-icon circle">
+                            <span class="material-icons">share</span>
+                        </button>
+                    </div>
+                    <button type="button" class="close-modal btn-close-circle">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+            </div>
+            <div id="public-recipe-details" class="details-body"></div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script src="community.js"></script>
+</body>
+
+</html>

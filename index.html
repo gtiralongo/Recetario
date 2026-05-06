@@ -1,184 +1,255 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Gusto - Tu Recetario Digital</title>
-    <meta name="description" content="Guarda, busca y organiza tus recetas favoritas con Gusto. Tu cocina, tus reglas.">
-    <!-- Google Fonts -->
+    <title>Gusto - Tu Recetario Digital y Comunidad de Cocina</title>
+    <meta name="description"
+        content="Descubre, guarda y organiza las mejores recetas. Únete a la comunidad de Gusto y lleva tu cocina al siguiente nivel.">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <!-- Favicon -->
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* Estilos específicos para AdSense (puedes moverlos a style.css luego) */
+        .ads-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            min-height: 90px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            overflow: hidden;
+        }
+
+        /* Estilos para anuncios integrados en el grid (In-feed) */
+        .recipe-card.ad-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            min-height: 380px;
+        }
+
+        .ad-card .ad-tag {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
 
 <body class="dark-theme m3-landing">
+    <!-- Navigation -->
+    <nav class="landing-nav glass">
+        <a href="index.html" class="logo">
+            <span class="material-icons">restaurant</span>
+            <span>Gusto</span>
+        </a>
+        <div class="nav-actions">
+            <a href="app.html" class="btn-primary">
+                <span class="material-icons">login</span>
+                <span>Entrar</span>
+            </a>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
     <header class="landing-hero">
-        <nav class="landing-nav glass">
-            <a href="index.html" class="logo">
-                <span class="material-icons">restaurant</span>
-                 <span>Gusto</span>
-            </a>
-            <a href="app.html" class="btn-primary">Entrar a mi recetario</a>
-        </nav>
         <div class="hero-content">
-            <h1>Tu cocina, tus reglas</h1>
-            <p>Guarda, organiza y comparte tus recetas favoritas.</p>
-            <a href="app.html" class="btn-primary btn-lg">
-                <span class="material-icons">restaurant</span>
-                 <span>Empezar ahora</span>
-            </a>
+            <span class="badge">Recetario Digital</span>
+            <h1 class="hero-title">Tu cocina, <span class="text-gradient">tus reglas</span></h1>
+            <p class="hero-subtitle">Guarda, organiza y comparte tus recetas favoritas.</p>
+            <div class="hero-btns">
+                <a href="app.html" class="btn-primary btn-lg">
+                    <span>Empezar ahora</span>
+                    <span class="material-icons">restaurant</span>
+                </a>
+            </div>
         </div>
+
+        <!-- Abstract Decoration -->
+        <div class="hero-blob"></div>
     </header>
 
-    <!-- Public Recipes Section (Original Position) -->
-    <section class="public-recipes-section" id="public-recipes">
-        <div class="section-header">
-            <h2>Recetas de la Comunidad</h2>
-            <p>Explora recetas públicas compartidas por usuarios</p>
-        </div>
-
-        <!-- Search -->
-        <div class="public-search-bar glass">
-            <div class="search-container">
-                 <span class="material-icons">search</span>
-                <input type="text" id="public-search" placeholder="Buscar por nombre, ingrediente o tag...">
-            </div>
-        </div>
-
-        <!-- Public Recipes Grid -->
-        <div class="recipe-grid" id="public-recipe-grid">
-             <div class="no-recipes">
-                 <span class="material-icons">sentiment_dissatisfied</span>
-                 <p>Cargando recetas...</p>
-             </div>
-        </div>
-    </section>
-
-    <!-- Tu Recetario Digital Section -->
-    <section class="section-alt" id="about">
-        <div class="section-content">
-            <div class="section-header">
-                <h2>Tu Recetario Digital</h2>
-                <p>La forma más inteligente de organizar tus recetas. Guarda, busca y accede a todas tus recetas en un solo lugar, desde cualquier dispositivo.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Favoritos Section -->
-    <section class="section-white" id="favorites">
-        <div class="showcase-container">
-            <div class="showcase-text">
-                <span class="material-icons showcase-icon">favorite</span>
-                <h2>Recetas Favoritas</h2>
-                <p>Marca tus recetas preferidas con un clic y tenlas siempre a mano. Filtra por favoritos para encontrar rápidamente esa receta que tanto te gusta.</p>
-                <a href="app.html" class="btn-primary">Ver mis favoritos</a>
-            </div>
-            <div class="showcase-image">
-                <div class="image-placeholder glass">
-                    <span class="material-icons">favorite_border</span>
-                    <p>Tus recetas favoritas</p>
+    <!-- Ad Space: Top Banner -->
+    <div id="adsense-top" class="ads-container">
+        <span>Espacio publicitario disponible (AdSense)</span>
+    </div>
+    <!-- Features Section: Organiza -->
+    <section class="section-showcase" id="organiza">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-text">
+                    <span class="section-tag">Organización</span>
+                    <h2>Tus recetas, siempre contigo</h2>
+                    <p>Olvídate de los papeles perdidos y los capturas de pantalla desordenadas. Con Gusto, guarda cada
+                        detalle: ingredientes, pasos, fotos y hasta videos de YouTube.</p>
+                    <ul class="feature-list">
+                        <li><span class="material-icons">cloud_done</span> Sincronización en la nube</li>
+                        <li><span class="material-icons">label</span> Organización por etiquetas personalizadas</li>
+                        <li><span class="material-icons">search</span> Búsqueda instantánea</li>
+                    </ul>
+                </div>
+                <div class="showcase-visual">
+                    <div class="visual-card glass">
+                        <span class="material-icons large">folder_special</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Planificador Semanal Section -->
-    <section class="section-alt" id="planner">
-        <div class="showcase-container reverse">
-            <div class="showcase-text">
-                <span class="material-icons showcase-icon">calendar_today</span>
-                <h2>Planificador Semanal</h2>
-                <p>Organiza tu semana con anticipación. Arrastra y suelta recetas en los días de la semana y ten claro qué vas a cocinar cada día.</p>
-                <a href="app.html" class="btn-primary">Planificar semana</a>
-            </div>
-            <div class="showcase-image">
-                <div class="image-placeholder glass">
-                    <span class="material-icons">view_week</span>
-                    <p>Tu plan semanal</p>
+    <!-- Features Section: Planifica -->
+    <section class="section-showcase alt-bg" id="planifica">
+        <div class="container">
+            <div class="showcase-grid reverse">
+                <div class="showcase-text">
+                    <span class="section-tag">Planificación</span>
+                    <h2>Domina tu semana</h2>
+                    <p>El planificador semanal te ayuda a reducir el estrés de "¿qué comemos hoy?". Organiza tus platos
+                        y genera automáticamente tu lista de compras.</p>
+                    <ul class="feature-list">
+                        <li><span class="material-icons">event</span> Planificador semanal intuitivo</li>
+                        <li><span class="material-icons">shopping_cart</span> Lista de compras automática</li>
+                        <li><span class="material-icons">savings</span> Ahorra tiempo y evita el desperdicio</li>
+                    </ul>
+                </div>
+                <div class="showcase-visual">
+                    <div class="visual-card glass">
+                        <span class="material-icons large">calendar_month</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Lista de Compras Section -->
-    <section class="section-white" id="shopping">
-        <div class="showcase-container">
-            <div class="showcase-text">
-                <span class="material-icons showcase-icon">shopping_cart</span>
-                <h2>Lista de Compras</h2>
-                <p>Genera automáticamente tu lista de compras basada en las recetas de tu planificador. Marca ingredientes comprados y simplifica tu rutina.</p>
-                <a href="app.html" class="btn-primary">Ver lista de compras</a>
-            </div>
-            <div class="showcase-image">
-                <div class="image-placeholder glass">
-                    <span class="material-icons">receipt_long</span>
-                    <p>Tu lista organizada</p>
+    <!-- Features Section: Modo Cocina -->
+    <section class="section-showcase" id="cocina">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-text">
+                    <span class="section-tag">Experiencia</span>
+                    <h2>Modo Cocina: Tu mejor asistente</h2>
+                    <p>Una interfaz diseñada para el calor de la cocina. Sin distracciones, con temporizadores
+                        integrados y fuentes grandes para que puedas seguir cada paso con facilidad.</p>
+                    <ul class="feature-list">
+                        <!-- <li><span class="material-icons">timer</span> Temporizadores múltiples</li> -->
+                        <li><span class="material-icons">text_fields</span> Lectura optimizada</li>
+                        <li><span class="material-icons">fullscreen</span> Modo pantalla completa</li>
+                    </ul>
+                </div>
+                <div class="showcase-visual">
+                    <div class="visual-card glass">
+                        <span class="material-icons large">restaurant_menu</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Modo Cocina Section -->
-    <section class="section-alt" id="cooking-mode">
-        <div class="showcase-container reverse">
-            <div class="showcase-text">
-                <span class="material-icons showcase-icon">kitchen</span>
-                <h2>Modo Cocina</h2>
-                <p>Disfruta de una interfaz optimizada para cocinar. Letra grande, temporizadores integrados y modo pantalla completa para que no te pierdas ningún detalle.</p>
-                <a href="app.html" class="btn-primary">Probar modo cocina</a>
-            </div>
-            <div class="showcase-image">
-                <div class="image-placeholder glass">
-                    <span class="material-icons">smartphone</span>
-                    <p>Interfaz de cocina</p>
+    <!-- Comunidad Gusto Teaser (Limpio y enfocado) -->
+    <section class="community-teaser-section" id="community">
+        <div class="container">
+            <div class="teaser-card glass">
+                <div class="teaser-content">
+                    <span class="section-tag">Comunidad</span>
+                    <h2>Inspiración sin límites</h2>
+                    <p>No cocines siempre lo mismo. Nuestra comunidad comparte nuevas creaciones cada día. Encuentra tu
+                        próxima receta favorita y guárdala con un solo toque.</p>
+                    <div class="teaser-stats">
+                        <div class="stat-item">
+                            <span class="material-icons">groups</span>
+                            <span class="stat-label">Comunidad Activa</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="material-icons">public</span>
+                            <span class="stat-label">Acceso Global</span>
+                        </div>
+                    </div>
+                    <a href="community.html" class="btn-primary btn-lg">
+                        <span>Explorar todas las recetas</span>
+                        <span class="material-icons">explore</span>
+                    </a>
+                </div>
+                <div class="teaser-visual">
+                    <div class="floating-recipes">
+                        <div class="mini-card glass"><span class="material-icons">ramen_dining</span></div>
+                        <div class="mini-card glass"><span class="material-icons">bakery_dining</span></div>
+                        <div class="mini-card glass"><span class="material-icons">icecream</span></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Recetas Públicas Info Section -->
-    <section class="section-white" id="public-info">
-        <div class="showcase-container">
-            <div class="showcase-text">
-                <span class="material-icons showcase-icon">groups</span>
-                <h2>Recetas Públicas</h2>
-                <p>Explora recetas compartidas por la comunidad. Descubre nuevas creaciones, filtra por categorías y añade las que más te gusten a tu recetario personal.</p>
-                <a href="#public-recipes" class="btn-primary">Ver recetas públicas</a>
-            </div>
-            <div class="showcase-image">
-                <div class="image-placeholder glass">
-                    <span class="material-icons">public</span>
-                    <p>Comunidad activa</p>
-                </div>
-            </div>
-        </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2>¿Listo para transformar tu experiencia en la cocina?</h2>
-            <p>Únete a Gusto hoy mismo y lleva tus recetas al siguiente nivel.</p>
-            <a href="app.html" class="btn-primary btn-lg">
-                <span class="material-icons">restaurant</span>
-                <span>Empezar ahora</span>
-            </a>
+    <!-- Ad Space: Bottom -->
+    <div id="adsense-bottom" class="ads-container">
+        <span>Espacio publicitario disponible (AdSense)</span>
+    </div>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <div class="cta-card glass">
+            <h2>Empieza a cocinar con Gusto hoy mismo</h2>
+            <p>Únete a miles de cocineros que ya organizan su pasión de forma digital.</p>
+            <a href="app.html" class="btn-primary btn-lg">Crear Cuenta Gratis</a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="landing-footer">
-        <p>&copy; 2026 Gusto - Tu recetario digital</p>
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo">Gusto</span>
+                    <p>Tu recetario digital definitivo.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="privacy.html">Privacidad</a>
+                    <a href="terms.html">Términos</a>
+                    <a href="mailto:hola@gustoapp.com">Contacto</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Gusto. Todos los derechos reservados.</p>
+            </div>
+        </div>
     </footer>
 
     <!-- View Recipe Modal -->
@@ -186,17 +257,17 @@
         <div class="modal-content glass detail-view">
             <div class="modal-header">
                 <div class="header-actions-row">
-                     <button type="button" class="close-modal btn-close-circle">
-                         <span class="material-icons">arrow_back</span>
-                     </button>
+                    <button type="button" class="close-modal btn-close-circle">
+                        <span class="material-icons">arrow_back</span>
+                    </button>
                     <div class="header-main-actions">
-                         <button id="public-share-btn" class="btn-icon circle">
-                             <span class="material-icons">share</span>
-                         </button>
+                        <button id="public-share-btn" class="btn-icon circle">
+                            <span class="material-icons">share</span>
+                        </button>
                     </div>
-                     <button type="button" class="close-modal btn-close-circle">
-                         <span class="material-icons">close</span>
-                     </button>
+                    <button type="button" class="close-modal btn-close-circle">
+                        <span class="material-icons">close</span>
+                    </button>
                 </div>
             </div>
             <div id="public-recipe-details" class="details-body">

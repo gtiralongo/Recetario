@@ -146,7 +146,21 @@ function renderPublicRecipes() {
         return;
     }
 
-    filtered.forEach(recipe => {
+    filtered.forEach((recipe, index) => {
+        // Inyectar tarjeta de publicidad cada 6 recetas
+        if (index > 0 && index % 6 === 0) {
+            const adCard = document.createElement('div');
+            adCard.className = 'recipe-card ad-card';
+            adCard.innerHTML = `
+                <span class="ad-tag">Publicidad</span>
+                <div id="adsense-infeed-${index}" style="width:100%;">
+                    <!-- Pegar código In-feed AdSense aquí -->
+                    <p style="color: var(--text-muted); font-size: 0.8rem; opacity: 0.5;">Espacio para AdSense In-feed</p>
+                </div>
+            `;
+            publicGrid.appendChild(adCard);
+        }
+
         const card = document.createElement('div');
         card.className = 'recipe-card public-card';
         const displayTags = (recipe.tags || []).slice(0, 2).map(t => `<span class="tag">${t}</span>`).join('');
