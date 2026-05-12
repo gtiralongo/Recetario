@@ -1,9 +1,11 @@
-const CACHE_NAME = 'gusto-v2';
+const CACHE_NAME = 'gusto-v3';
 const ASSETS = [
     './',
     './index.html',
     './app.html',
+    './community.html',
     './public.js',
+    './community.js',
     './style.css',
     './main.js',
     './manifest.json',
@@ -31,8 +33,8 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
-    // Always fetch app.js from network to pick up changes immediately
-    if (url.pathname.endsWith('app.js') || url.pathname.endsWith('sw.js')) {
+    // Always fetch JS from network to pick up changes immediately
+    if (url.pathname.endsWith('app.js') || url.pathname.endsWith('sw.js') || url.pathname.endsWith('public.js') || url.pathname.endsWith('community.js')) {
         event.respondWith(
             fetch(event.request)
                 .then(response => {
