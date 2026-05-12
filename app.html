@@ -98,6 +98,10 @@
                                     </a>
                                     <button class="manage-tags-btn"><span class="material-icons">sell</span>
                                          Gestionar Tags</button>
+                                    <button class="ai-kitchen-btn"><span class="material-icons">auto_awesome</span>
+                                         Cocina IA <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
+                                    <button class="explore-btn"><span class="material-icons">travel_explore</span>
+                                         Explorar Recetas <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
                                     <div class="dropdown-divider"></div>
                                     <button class="logout-btn"><span class="material-icons">logout</span> Cerrar
                                          Sesión</button>
@@ -160,6 +164,10 @@
                         </a>
                         <button class="manage-tags-btn"><span class="material-icons">sell</span> Gestionar
                              Tags</button>
+                        <button class="ai-kitchen-btn"><span class="material-icons">auto_awesome</span>
+                             Cocina IA <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
+                        <button class="explore-btn"><span class="material-icons">travel_explore</span>
+                             Explorar Recetas <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
                         <div class="dropdown-divider"></div>
                         <button class="logout-btn"><span class="material-icons">logout</span> Cerrar Sesión</button>
                     </div>
@@ -194,6 +202,105 @@
                     <!-- Shopping list items will be injected here -->
                 </div>
             </section>
+
+            <!-- AI Recipes View -->
+            <section id="ai-recipes-view" class="view-section" style="display: none;">
+                <div class="header-info">
+                    <h1><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">auto_awesome</span> Cocina con IA <span style="font-size:0.8rem;opacity:0.5;font-weight:400;">beta</span></h1>
+                    <p>Describe tu receta ideal y el asistente la creará para ti</p>
+                </div>
+                <div class="ai-chat-container glass">
+                    <div class="ai-chat-messages" id="ai-chat-messages">
+                        <div class="ai-message ai-bot-message">
+                            <div class="ai-avatar"><span class="material-icons">auto_awesome</span></div>
+                            <div class="ai-message-content">
+                                <p>¡Hola! Soy tu asistente de cocina. <strong>Dime qué ingredientes tienes o qué tipo de receta buscas</strong> y la crearé especialmente para ti.</p>
+                                <p style="margin-top: 8px; opacity: 0.7; font-size: 0.9rem;">Ejemplos de cómo pedirlo:</p>
+                                <ul style="margin-top: 4px; opacity: 0.7; font-size: 0.9rem; padding-left: 1.2rem;">
+                                    <li>"Pollo con limón"</li>
+                                    <li>"Una receta vegetariana con quinoa y espinacas"</li>
+                                    <li>"Algo rápido con pollo"</li>
+                                    <li>"Una receta mexicana"</li>
+                                    <li>"Pasta con tomate y albahaca"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ai-chat-input-container">
+                        <textarea id="ai-chat-input" placeholder="Describe tu receta ideal..." rows="2"></textarea>
+                        <button id="ai-chat-send-btn" class="btn-primary" title="Generar receta">
+                            <span class="material-icons">send</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Explore View (TheMealDB) -->
+            <section id="explore-view" class="view-section" style="display: none;">
+                <div class="header-info">
+                    <h1><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">travel_explore</span> Explorar Recetas</h1>
+                    <p>Descubre recetas de todo el mundo</p>
+                </div>
+
+                <!-- ANUNCIO: Banner horizontal (comentado hasta implementar AdSense)
+                <div id="adsense-top" class="ads-container">
+                    <span>Publicidad (Banner Horizontal)</span>
+                </div>
+                -->
+
+                <div class="explore-container glass">
+                    <div class="explore-toolbar">
+                        <div class="explore-search-row">
+                            <input type="text" id="explore-input" placeholder="Buscar por nombre o ingrediente...">
+                            <button id="explore-search-btn" class="btn-primary" title="Buscar">
+                                <span class="material-icons">search</span>
+                            </button>
+                            <button id="explore-random-btn" class="btn-secondary-sm" title="Receta aleatoria">
+                                <span class="material-icons">casino</span>
+                            </button>
+                        </div>
+                        <div class="explore-chips-row" id="explore-chips-row">
+                            <button class="explore-chip active" data-cat="categories">Categorías</button>
+                        </div>
+                        <div class="explore-subchips" id="explore-subchips"></div>
+                    </div>
+                    <div id="explore-status" class="explore-status"></div>
+                    <div id="explore-grid" class="recipe-grid"></div>
+                </div>
+                <!--
+                <aside class="ads-sidebar explore-ads-sidebar">
+                    <div class="ads-container" style="height: 600px; position: sticky; top: 100px;">
+                        <span>Publicidad Lateral (SkyScraper)</span>
+                    </div>
+                </aside>
+                -->
+            </section>
+
+            <!-- Explore Detail Modal -->
+            <div id="explore-modal" class="modal">
+                <div class="modal-content glass detail-view">
+                    <div class="modal-header">
+                        <div class="header-actions-row">
+                            <button type="button" class="close-modal btn-close-circle">
+                                <span class="material-icons">arrow_back</span>
+                            </button>
+                            <div class="header-main-actions">
+                                <!--
+                                <button id="explore-save-btn" class="btn-primary-sm">
+                                    <span class="material-icons">save</span> Guardar en Mis Recetas
+                                </button>
+                                -->
+                            </div>
+                            <button type="button" class="close-modal btn-close-circle">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="explore-recipe-details" class="details-body">
+                        <!-- Recipe details injected here -->
+                    </div>
+                </div>
+            </div>
 
             <section class="random-recipes-container" id="random-recipes-container">
                 <div class="header-info">
