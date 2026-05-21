@@ -702,6 +702,26 @@ function setupEventListeners() {
             btn.onclick = () => auth.signOut();
         });
     }
+
+    // Import/Export JSON
+    document.querySelectorAll('#import-json-btn-desktop, #import-json-btn-mobile').forEach(btn => {
+        btn?.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-container').forEach(c => c.classList.remove('active'));
+            importError.style.display = 'none';
+            jsonInput.value = '';
+            importModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    document.querySelectorAll('#export-json-btn-desktop, #export-json-btn-mobile').forEach(btn => {
+        btn?.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-container').forEach(c => c.classList.remove('active'));
+            exportRecipes();
+        });
+    });
+
+    processJsonBtn?.addEventListener('click', processImportedJson);
 }
 
 function checkAuth() { return isLoggedIn; }
@@ -2151,13 +2171,16 @@ function processImportedJson() {
             steps: Array.isArray(data.instructions) ? data.instructions.join('\n') : data.instructions,
             video: data.video || '',
             image: data.image || `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800`,
+            time: parseInt(data.time) || 30,
+            difficulty: ['Fácil', 'Media', 'Difícil'].includes(data.difficulty) ? data.difficulty : 'Media',
             isFavorite: false,
-            isPublic: false
+            isPublic: data.isPublic === true || data.isPublic === 'true'
         };
         recipes.push(newRecipe);
         saveToLocalStorage();
         renderRecipes();
         importModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
         showToast('Importado con éxito');
     } catch (e) {
         importError.textContent = 'JSON no válido';

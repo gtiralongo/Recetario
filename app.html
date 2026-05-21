@@ -103,6 +103,11 @@
                                     <button class="explore-btn"><span class="material-icons">travel_explore</span>
                                          Explorar Recetas <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
                                     <div class="dropdown-divider"></div>
+                                    <button id="import-json-btn-desktop"><span class="material-icons">upload_file</span>
+                                         Importar JSON</button>
+                                    <button id="export-json-btn-desktop"><span class="material-icons">download</span>
+                                         Exportar JSON</button>
+                                    <div class="dropdown-divider"></div>
                                     <button class="logout-btn"><span class="material-icons">logout</span> Cerrar
                                          Sesión</button>
                                 </div>
@@ -169,11 +174,17 @@
                         <button class="explore-btn"><span class="material-icons">travel_explore</span>
                              Explorar Recetas <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">beta</span></button>
                         <div class="dropdown-divider"></div>
+                        <button id="import-json-btn-mobile"><span class="material-icons">upload_file</span>
+                             Importar JSON</button>
+                        <button id="export-json-btn-mobile"><span class="material-icons">download</span>
+                             Exportar JSON</button>
+                        <div class="dropdown-divider"></div>
                         <button class="logout-btn"><span class="material-icons">logout</span> Cerrar Sesión</button>
                     </div>
                 </div>
             </div>
         </div>
+
 
 
         <main class="content">
@@ -451,6 +462,15 @@
             <div class="modal-body" style="padding: 2rem;">
                 <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Pega aquí el código JSON de
                     tu receta para cargarla automáticamente.</p>
+
+                <div style="background: var(--glass-bg, rgba(255,255,255,0.05)); border: 1px solid var(--primary, #e07b39); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <span class="material-icons" style="color: var(--primary, #e07b39); flex-shrink: 0;">smart_display</span>
+                    <div>
+                        <strong style="display: block; margin-bottom: 0.25rem;">¿Tenés un video de la receta?</strong>
+                        <span style="color: var(--text-muted);">Usá <a href="https://gemini.google.com/gem/1BAdGqVHDUbFCO89Y2hXEc91qKh5fgu6D?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: var(--primary, #e07b39); text-decoration: underline;">este prompt de Gemini</a> para extraer automáticamente los ingredientes, pasos y datos desde un video de YouTube. El resultado lo pegás acá directamente.</span>
+                    </div>
+                </div>
+
                 <textarea id="json-input" rows="12" style="width: 100%; font-family: monospace; font-size: 0.85rem;"
                     placeholder='{ "title": "...", "ingredients": [...], "instructions": [...] }'></textarea>
                 <div id="import-error"

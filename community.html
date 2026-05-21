@@ -13,6 +13,7 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3565/3565418.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 
     <!-- Firebase SDK -->
@@ -67,13 +68,12 @@
 
         .ads-sidebar {
             display: none;
-            /* Reservado para desktop si quieres poner banners laterales */
         }
 
         @media (min-width: 1200px) {
             .community-layout {
                 display: grid;
-                grid-template-columns: 1fr 300px;
+                grid-template-columns: 1fr 200px;
                 gap: 2rem;
                 max-width: 1400px;
                 margin: 0 auto;
@@ -136,7 +136,7 @@
         </div>
 
         <aside class="ads-sidebar">
-            <div class="ads-container" style="height: 600px; position: sticky; top: 100px;">
+            <div class="ads-container" style="height: 400px; position: sticky; top: 100px;">
                 <span>Publicidad Lateral (SkyScraper)</span>
             </div>
         </aside>

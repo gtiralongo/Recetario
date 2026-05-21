@@ -5549,7 +5549,7 @@ input:checked + .slider {
 .visual-card .material-icons.large { font-size: 8rem; color: var(--primary); opacity: 0.8; }
 @media (max-width: 992px) { .showcase-grid, .showcase-grid.reverse { grid-template-columns: 1fr; text-align: center; gap: 3rem; } .feature-list li { justify-content: center; } }
 
-/* --- HIDE ADS TEMPORARILY --- */
+/* --- ADS --- */
 .ads-container, .ad-card, .ads-sidebar { display: none !important; }
 
 /* Fix Landing Nav in Community/Index */

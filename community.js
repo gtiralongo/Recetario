@@ -1,7 +1,7 @@
 let allPublicRecipes = [];
 let filteredRecipes = [];
 let currentPage = 1;
-const recipesPerPage = 20;
+const recipesPerPage = 21;
 let userRecipeIds = new Set();
 let isUserLoggedIn = false;
 
