@@ -5199,7 +5199,7 @@ input:checked + .slider {
     }
 
     .m3-app .detail-content {
-        padding: 1rem 1.5rem 2rem;
+        padding: 1rem 1.5rem calc(65px + 2rem);
     }
 
     .m3-app .detail-header-info h1 {
@@ -5212,6 +5212,7 @@ input:checked + .slider {
         max-width: 100%;
         border-radius: 0;
         max-height: 100dvh;
+        padding-bottom: calc(65px + 1.5rem);
     }
 
     .m3-app .detail-footer {
